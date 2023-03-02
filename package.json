@@ -1,0 +1,44 @@
+{
+  "name": "@squidcloud/react",
+  "version": "1.0.0",
+  "description": "Squid React SDK",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "tsc",
+    "lint": "eslint ./src",
+    "publish:public": "npm version patch && npm run build && npm publish --access public"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "keywords": [
+    "Squid",
+    "Squid Cloud",
+    "react"
+  ],
+  "peerDependencies": {
+    "react": "^16.11.0 || ^17 || ^18",
+    "react-dom": "^16.11.0 || ^17 || ^18"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.4",
+    "@types/react": "^18.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
+    "eslint": "^8.35.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "prettier": "^2.8.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rimraf": "^4.1.2"
+  },
+  "dependencies": {
+    "@squidcloud/client": "^1.0.20",
+    "@squidcloud/common": "^1.0.6",
+    "rxjs": "^7.5.7"
+  }
+}

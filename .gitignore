@@ -1,0 +1,61 @@
+*.launch
+*.log
+*.sublime-workspace
+
+# Secrets
+.env
+.secrets
+
+# OS
+.*.swp
+.DS_Store
+.bash_history
+.bash_logout
+.bash_profile
+.bashrc
+.git-completion.bash
+.git-prompt.sh
+.gitconfig
+.inputrc
+.motd_shown
+.profile
+.Xauthority
+.sudo_as_admin_successful
+.netrwhist
+
+# VI
+.viminfo
+.vimrc
+.*.swp
+
+# Javascript
+.turbo
+node_modules
+.angular
+dist
+coverage
+
+# Terraform
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.bin
+
+# IntelliJ
+/core/src/sandbox.ts
+/deno-server/tmp/
+
+# Docker
+.docker/
+.aws
+.azure
+
+# NPM
+.npmrc
