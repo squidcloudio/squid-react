@@ -1,15 +1,8 @@
-import {
-  DocumentReference,
-  QueryBuilder,
-  useCollection,
-  useDoc,
-  useDocs,
-  useQuery,
-} from "@squidcloud/react";
-import { debounce } from "debounce";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
-import "./App.css";
-import { Names } from "./data/names";
+import { DocumentReference, QueryBuilder } from '@squidcloud/client';
+import { useCollection, useDoc, useDocs, useQuery } from '@squidcloud/react';
+import { debounce } from 'debounce';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { Names } from './data/names';
 
 type Person = {
   name: string;
@@ -32,17 +25,18 @@ function randomName(): string {
 function App(): JSX.Element {
   const [hide, setHide] = useState(false);
 
-  const collection = useCollection<Person>("people");
-  const events = useCollection<Event>("events");
+  const collection = useCollection<Person>('people');
+  const events = useCollection<Event>('events');
 
-  const slider = events.doc("slider");
-  const age = useDoc(slider, true)?.value || 30;
+  const slider = events.doc('slider');
+  useDoc(slider, true);
+  const age = slider.data().value || 30;
 
   useEffect(() => {
     const createSlider = async (): Promise<void> => {
       const data = await slider.snapshot();
       if (!data) {
-        await slider.insert({ name: "slider", value: 30 });
+        await slider.insert({ name: 'slider', value: 30 });
       }
     };
     createSlider().then();
@@ -52,7 +46,7 @@ function App(): JSX.Element {
     debounce((value: string) => {
       slider.update({ value: Number(value) }).then();
     }, 200),
-    []
+    [],
   );
 
   function onSliderChange(e: ChangeEvent<HTMLInputElement>): void {
@@ -74,22 +68,22 @@ function App(): JSX.Element {
             value={age}
             onChange={onSliderChange}
           />
-          <div style={{ display: "flex" }}>
+          <div style={{ display: 'flex' }}>
             <Docs />
             <Query query={collection.query()} description="All" />
             <Query
-              query={collection.query().where("age", ">", age)}
+              query={collection.query().where('age', '>', age)}
               description={`> ${age}`}
             />
             <Query
-              query={collection.query().where("age", "<=", age)}
+              query={collection.query().where('age', '<=', age)}
               description={`<= ${age}`}
             />
           </div>
         </div>
       )}
-      <button style={{ marginTop: "32px" }} onClick={toggle}>
-        {hide ? "Mount" : "Unmount"}
+      <button style={{ marginTop: '32px' }} onClick={toggle}>
+        {hide ? 'Mount' : 'Unmount'}
       </button>
     </div>
   );
@@ -104,8 +98,8 @@ type QueryProps = {
 
 const Docs = <T,>(): JSX.Element => {
   const [docs, setDocs] = useState<Array<DocumentReference<Person>>>([]);
-  const collection = useCollection<Person>("people");
-  const dataMap = useDocs(docs, true);
+  const collection = useCollection<Person>('people');
+  useDocs(docs, true);
 
   function add(): void {
     const doc = collection.doc();
@@ -122,15 +116,16 @@ const Docs = <T,>(): JSX.Element => {
   }
 
   return (
-    <div style={{ width: "200px", margin: "16px" }}>
+    <div style={{ width: '200px', margin: '16px' }}>
       <h3>Docs</h3>
       <button onClick={add}>Add</button>
       <ul>
         {docs.map((d, i) => {
-          const data = dataMap.get(d);
+          const data = d.data();
+          const hasData = !!Object.keys(data).length;
           return (
             <li key={d.squidDocId}>
-              {data ? (
+              {hasData ? (
                 <>
                   <span>
                     {data.name} {data.age}
@@ -138,7 +133,7 @@ const Docs = <T,>(): JSX.Element => {
                   <button onClick={(): void => remove(d)}>X</button>
                 </>
               ) : (
-                "Missing Data"
+                'Missing Data'
               )}
             </li>
           );
@@ -149,7 +144,7 @@ const Docs = <T,>(): JSX.Element => {
 };
 
 const Query = ({ query, description }: QueryProps): JSX.Element => {
-  const { docs, data } = useQuery(query, true);
+  const docs = useQuery(query, true);
 
   function update(): void {
     for (const doc of docs) {
@@ -164,16 +159,19 @@ const Query = ({ query, description }: QueryProps): JSX.Element => {
   }
 
   return (
-    <div style={{ width: "200px", margin: "16px" }}>
+    <div style={{ width: '200px', margin: '16px' }}>
       <h3>{description}</h3>
       <button onClick={update}>Update</button>
       <button onClick={remove}>Delete</button>
       <ul>
-        {data.map((d, i) => (
-          <li key={i}>
-            {d.name} {d.age}
-          </li>
-        ))}
+        {docs.map((d) => {
+          const data = d.data();
+          return (
+            <li key={d.squidDocId}>
+              {data.name} {data.age}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

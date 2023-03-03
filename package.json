@@ -8,6 +8,7 @@
     "prebuild": "rimraf dist",
     "build": "tsc",
     "lint": "eslint ./src",
+    "format": "prettier --write \"./**/src/**/*.ts\"",
     "publish:public": "npm version patch && npm run build && npm publish --access public"
   },
   "files": [

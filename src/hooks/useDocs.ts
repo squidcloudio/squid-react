@@ -14,7 +14,7 @@ const usePrevious = <T>(value: T): T | undefined => {
 export function useDocs<T extends DocumentData>(
   docs: Array<DocumentReference<T>>,
   subscribe = false,
-): Map<DocumentReference<T>, T | undefined> {
+): Array<DocumentReference<T>> {
   const prevDocs = usePrevious<Array<DocumentReference<T>>>(docs);
   const subscriptions = useRef<Map<DocumentReference<T>, Subscription>>(new Map());
   const [_, refresh] = useState<[]>([]);
@@ -52,10 +52,5 @@ export function useDocs<T extends DocumentData>(
     };
   }, []);
 
-  return new Map(
-    docs.map((doc) => {
-      const data = doc.data();
-      return [doc, Object.keys(data).length ? data : undefined];
-    }),
-  );
+  return docs;
 }
