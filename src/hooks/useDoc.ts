@@ -3,7 +3,7 @@ import { DocumentData } from '@squidcloud/common';
 import { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-export function useDoc<T extends DocumentData>(doc: DocumentReference<T>, subscribe = false): T {
+export function useDoc<T extends DocumentData>(doc: DocumentReference<T>, subscribe = false): DocumentReference<T> {
   const [_, refresh] = useState<[]>([]);
 
   useEffect(() => {
@@ -24,5 +24,5 @@ export function useDoc<T extends DocumentData>(doc: DocumentReference<T>, subscr
     };
   }, [doc, subscribe]);
 
-  return doc.data();
+  return doc;
 }
