@@ -103,12 +103,12 @@ const Docs = <T,>(): JSX.Element => {
 
   function add(): void {
     const doc = collection.doc();
-    doc.insert({ name: randomName(), age: randomAge() });
+    doc.insert({ name: randomName(), age: randomAge() }).then();
     setDocs(docs.concat(doc));
   }
 
   function remove(doc: DocumentReference<Person>): void {
-    doc.delete();
+    doc.delete().then();
     const index = docs.indexOf(doc);
     const newDocs = [...docs];
     newDocs.splice(index, 1);
@@ -120,7 +120,7 @@ const Docs = <T,>(): JSX.Element => {
       <h3>Docs</h3>
       <button onClick={add}>Add</button>
       <ul>
-        {docs.map((d, i) => {
+        {docs.map((d) => {
           const data = d.data();
           const hasData = !!Object.keys(data).length;
           return (

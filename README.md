@@ -27,7 +27,6 @@ Create an **Application** using the [Squid Cloud Console](https://console.squid.
 * Copy the **Application ID**
 * Add the following provider to your React application:
 ```jsx
-import { SquidRegion } from '@squidcloud/common';
 import { SquidContextProvider } from "@squidcloud/react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
@@ -45,9 +44,9 @@ root.render(
   </SquidContextProvider>
 );
 ```
-In the local environment, you can use the `Local` region.
+In the local environment, you can use the `local` region.
 ```ts
-region: SquidRegion.Local,
+region: 'local',
 ```
 
 Note: If you're using a `.env` file for environment management, simply set the `appId` and `region` to your preferred envars.

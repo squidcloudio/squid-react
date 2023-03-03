@@ -38,8 +38,8 @@
     "rimraf": "^4.1.2"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.20",
-    "@squidcloud/common": "^1.0.6",
+    "@squidcloud/client": "^1.0.23",
+    "@squidcloud/common": "^1.0.9",
     "rxjs": "^7.5.7"
   }
 }
