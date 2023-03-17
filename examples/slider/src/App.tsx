@@ -30,7 +30,7 @@ function App(): JSX.Element {
 
   const slider = events.doc('slider');
   useDoc(slider, true);
-  const age = slider.data().value || 30;
+  const age = slider.data.value || 30;
 
   useEffect(() => {
     const createSlider = async (): Promise<void> => {
@@ -121,14 +121,13 @@ const Docs = <T,>(): JSX.Element => {
       <button onClick={add}>Add</button>
       <ul>
         {docs.map((d) => {
-          const data = d.data();
-          const hasData = !!Object.keys(data).length;
+          const hasData = !!Object.keys(d.data).length;
           return (
             <li key={d.squidDocId}>
               {hasData ? (
                 <>
                   <span>
-                    {data.name} {data.age}
+                    {d.data.name} {d.data.age}
                   </span>
                   <button onClick={(): void => remove(d)}>X</button>
                 </>
@@ -165,10 +164,9 @@ const Query = ({ query, description }: QueryProps): JSX.Element => {
       <button onClick={remove}>Delete</button>
       <ul>
         {docs.map((d) => {
-          const data = d.data();
           return (
             <li key={d.squidDocId}>
-              {data.name} {data.age}
+              {d.data.name} {d.data.age}
             </li>
           );
         })}

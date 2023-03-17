@@ -36,17 +36,13 @@ const root = ReactDOM.createRoot(document.getElementById("root"))
 root.render(
   <SquidContextProvider
     options={{
-      appId: <SQUID_CLOUD_APP_ID>,
-      region: <SQUID_CLOUD_REGION>,
+      appId: '<SQUID_CLOUD_APP_ID>',
+      region: '<SQUID_CLOUD_REGION>',
     }}
   >
     <App />
   </SquidContextProvider>
 );
-```
-In the local environment, you can use the `local` region.
-```ts
-region: 'local',
 ```
 
 Note: If you're using a `.env` file for environment management, simply set the `appId` and `region` to your preferred envars.
@@ -108,7 +104,7 @@ function App() {
     <ul>
       {docs.map((d) => (
         <li key={d.squidDocId}>
-          {d.data().foo}
+          {d.data.foo}
         </li>
       ))}
     </ul>
@@ -131,7 +127,7 @@ function App() {
    */
   useDoc(doc, true /* subscribe */);
   
-  return <span>{doc.data().foo}</span>
+  return <span>{doc.data.foo}</span>
 }
 ```
 
@@ -152,8 +148,8 @@ function App() {
   
   return (
     <ul>
-      <li>{docs[0].data().foo}</li>
-      <li>{docs[1].data().foo}</li>
+      <li>{docs[0].data.foo}</li>
+      <li>{docs[1].data.foo}</li>
     </ul>
   );
 }
@@ -161,6 +157,6 @@ function App() {
 
 ## API reference
 
-Explore public API's available in the [Squid Cloud documentation](https://squid.cloud/docs).
+Explore public APIs available in the [Squid Cloud documentation](https://squid.cloud/docs).
 
 ---
