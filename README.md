@@ -103,7 +103,7 @@ function App() {
   return (
     <ul>
       {docs.map((d) => (
-        <li key={d.squidDocId}>
+        <li key={d.refId}>
           {d.data.foo}
         </li>
       ))}
