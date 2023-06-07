@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "find . \\( -name \"node_modules\" -o -name \"dist\" \\) -type d -exec rm -rf {} +"
   },
   "dependencies": {
     "@squidcloud/react": "file:../..",
