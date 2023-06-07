@@ -42,12 +42,12 @@ export function useObservable<T>(
           complete: false,
         }),
       error: (error) =>
-        setState({
+        setState((prevState) => ({
+          ...prevState,
           loading: false,
-          data: null,
           error,
           complete: false,
-        }),
+        })),
       complete: () =>
         setState((prevState) => ({
           ...prevState,

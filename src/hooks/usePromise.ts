@@ -43,11 +43,11 @@ export function usePromise<T>(
       })
       .catch((error) => {
         if (isSubscribed) {
-          setState({
+          setState((prevState) => ({
+            ...prevState,
             loading: false,
-            data: null,
             error,
-          });
+          }));
         }
       });
 
