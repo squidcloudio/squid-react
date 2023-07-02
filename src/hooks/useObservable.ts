@@ -33,6 +33,13 @@ export function useObservable<T>(
   const observableMemo = useMemo(() => observable, deps);
 
   useEffect(() => {
+    // Set loading state to true when the observable changes
+    setState(() => ({
+      loading: true,
+      data: initialValue !== undefined ? initialValue : null,
+      error: null,
+      complete: false,
+    }));
     const subscription = observableMemo.subscribe({
       next: (value: T) =>
         setState({
