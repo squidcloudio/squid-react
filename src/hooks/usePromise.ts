@@ -31,6 +31,13 @@ export function usePromise<T>(
 
   useEffect(() => {
     let isSubscribed = true;
+    // Set loading state to true when the observable changes
+    if (!state.loading) {
+      setState((prevState) => ({
+        ...prevState,
+        loading: true,
+      }));
+    }
     promiseFnMemo()
       .then((value: T) => {
         if (isSubscribed) {

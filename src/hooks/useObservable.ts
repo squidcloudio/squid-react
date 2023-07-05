@@ -9,17 +9,17 @@ export type ObservableType<T> = {
 };
 
 export function useObservable<T>(
-  observable: Observable<T>,
+  observable: Observable<T> | (() => Observable<T>),
   initialValue: T,
   deps?: ReadonlyArray<unknown>,
 ): ObservableType<T>;
 export function useObservable<T>(
-  observable: Observable<T>,
+  observable: Observable<T> | (() => Observable<T>),
   initialValue?: T,
   deps?: ReadonlyArray<unknown>,
 ): ObservableType<T | null>;
 export function useObservable<T>(
-  observable: Observable<T>,
+  observable: Observable<T> | (() => Observable<T>),
   initialValue?: T,
   deps: ReadonlyArray<unknown> = [],
 ): ObservableType<T | null> {
@@ -30,16 +30,17 @@ export function useObservable<T>(
     complete: false,
   });
 
-  const observableMemo = useMemo(() => observable, deps);
+  const observableMemo = useMemo(() => (typeof observable === 'function' ? observable() : observable), deps);
 
   useEffect(() => {
     // Set loading state to true when the observable changes
-    setState(() => ({
-      loading: true,
-      data: initialValue !== undefined ? initialValue : null,
-      error: null,
-      complete: false,
-    }));
+    if (!state.loading) {
+      setState((prevState) => ({
+        ...prevState,
+        loading: true,
+        complete: false,
+      }));
+    }
     const subscription = observableMemo.subscribe({
       next: (value: T) =>
         setState({
@@ -62,7 +63,11 @@ export function useObservable<T>(
           complete: true,
         })),
     });
-    return () => subscription.unsubscribe(); // Clean-up function
+    return () => {
+      // Deferring the unsubscribe allows us to check if the new query is a subquery of the previous
+      // subscription.
+      setTimeout(() => subscription.unsubscribe(), 10);
+    };
   }, [observableMemo]);
 
   return state;
