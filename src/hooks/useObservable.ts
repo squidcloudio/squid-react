@@ -66,7 +66,7 @@ export function useObservable<T>(
     return () => {
       // Deferring the unsubscribe allows us to check if the new query is a subquery of the previous
       // subscription.
-      setTimeout(() => subscription.unsubscribe(), 10);
+      setTimeout(() => subscription.unsubscribe(), 0);
     };
   }, [observableMemo]);
 
