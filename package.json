@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "rxjs": "^7.5.7",
-    "@squidcloud/client": "^1.0.75",
-    "@squidcloud/common": "^1.0.57"
+    "@squidcloud/client": "^1.0.76",
+    "@squidcloud/common": "^1.0.58"
   }
 }
