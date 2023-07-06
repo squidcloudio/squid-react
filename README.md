@@ -28,7 +28,7 @@ Create an **Application** using the [Squid Cloud Console](https://console.squid.
 - Copy the **Application ID**
 - Add the following provider to your React application:
 
-```jsx
+```tsx
 import { SquidContextProvider } from '@squidcloud/react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -50,7 +50,7 @@ root.render(
 Note: If you're using a `.env` file for environment management, simply set the `appId` and `region` to your preferred
 envars.
 
-```jsx
+```tsx
 <SquidContextProvider
   options={{
     appId: process.env.SQUID_CLOUD_APP_ID,
@@ -67,7 +67,7 @@ Wrapping your application in a `SquidContextProvider` provides the app with acce
 
 To directly reference this instance, you can use the `useSquid` hook.
 
-```jsx
+```tsx
 function App() {
   const squid = useSquid();
 
@@ -79,16 +79,13 @@ function App() {
 }
 ```
 
-However, there are some additional hooks to provide easier access to collections (`useCollection`) queries (`useQuery`)
-and documents (`useDoc`, `useDocs`).
+However, there are some additional hooks to provide easier access to collections (`useCollection`) queries (`useQuery`) and documents (`useDoc`, `useDocs`).
 
 #### useCollection
 
-The `useCollection` hook is a simple wrapper around `squid.collection(...)`. It allows you to access a collection
-without needing a `squid` reference. Once you have a collection, you can use the collection to create queries and manage
-documents.
+The `useCollection` hook is a simple wrapper around `squid.collection(...)`. It allows you to access a collection without needing a `squid` reference. Once you have a collection, you can use the collection to create queries and manage documents.
 
-```js
+```tsx
 const collection = useCollection('my-collection');
 
 const query = collection.query().where('foo', '==', 'bar');
@@ -108,7 +105,7 @@ The hook returns an object that includes the following properties:
 
 ```jsx
 function App() {
-  const collection = useCollection('my-collection');
+  const collection = useCollection<User>('users');
 
   /**
    * The list of docs will be streamed to the client and will be
@@ -147,7 +144,7 @@ The hook returns an object that includes the following properties:
 
 ```jsx
 function App() {
-  const collection = useCollection('my-collection');
+  const collection = useCollection<User>('users');
   const doc = collection.doc('my-id');
 
   /**
@@ -171,7 +168,7 @@ The hook returns an object that includes the following properties:
 
 ```jsx
 function App() {
-  const collection = useCollection('my-collection');
+  const collection = useCollection<User>('users');
   const docs = [collection.doc('my-id-1'), collection.doc('my-id-2')];
 
   /**
@@ -216,7 +213,7 @@ function App() {
 
   const { loading, data, error, complete } = useObservable(
     squid
-      .collection('my-collection')
+      .collection<User>('users')
       .query()
       .where('foo', '>', bar)
       .snapshots(),
@@ -233,7 +230,7 @@ when `bar` changes, we need to pass it as a dependency.
 
 Whenever the `deps` change, `loading` is reset to true until a value is emitted from the newly created observable.
 
-In addition to passing an observable directly to the `useObservable` hook, you can also pass a function that return an observable.
+In addition to passing an observable directly to the `useObservable` hook, you can also pass a function that returns an observable.
 
 ```typescript
 const { data } = useObservable(() => from(query.snapshot()));
@@ -259,7 +256,7 @@ function App() {
   const { loading, data, error } = usePromise(
     () => {
       return squid
-        .collection('my-collection')
+        .collection<User>('users')
         .query()
         .where('foo', '>', bar)
         .snapshot();
