@@ -28,7 +28,7 @@ Create an **Application** using the [Squid Cloud Console](https://console.squid.
 - Copy the **Application ID**
 - Add the following provider to your React application:
 
-```jsx
+```tsx
 import { SquidContextProvider } from '@squidcloud/react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -50,7 +50,7 @@ root.render(
 Note: If you're using a `.env` file for environment management, simply set the `appId` and `region` to your preferred
 envars.
 
-```jsx
+```tsx
 <SquidContextProvider
   options={{
     appId: process.env.SQUID_CLOUD_APP_ID,
@@ -63,11 +63,11 @@ envars.
 
 ### Hooks
 
-Wrapping your application in a `SquidContextProvider` providers the app with access to a `Squid` instance.
+Wrapping your application in a `SquidContextProvider` provides the app with access to a `Squid` instance.
 
-To directly reference this instance, your can use the `useSquid` hook.
+To directly reference this instance, you can use the `useSquid` hook.
 
-```jsx
+```tsx
 function App() {
   const squid = useSquid();
 
@@ -79,16 +79,13 @@ function App() {
 }
 ```
 
-However, there are some additional hooks to provider easier access to collections (`useCollection`) queries (`useQuery`)
-and documents (`useDoc`, `useDocs`).
+However, there are some additional hooks to provide easier access to collections (`useCollection`) queries (`useQuery`) and documents (`useDoc`, `useDocs`).
 
 #### useCollection
 
-The `useCollection` hook is a simple wrapper around `squid.collection(...)`. It allows you to access a collection
-without needing a `squid` reference. Once you have a collection, you can use the collection to create queries and manage
-documents.
+The `useCollection` hook is a simple wrapper around `squid.collection(...)`. It allows you to access a collection without needing a `squid` reference. Once you have a collection, you can use the collection to create queries and manage documents.
 
-```js
+```tsx
 const collection = useCollection('my-collection');
 
 const query = collection.query().where('foo', '==', 'bar');
@@ -99,15 +96,22 @@ const doc = collection.doc('my-id');
 
 When a query has been created, you use the `useQuery` hook to execute it, and optionally `subscribe` to the results:
 
+The hook returns an object that includes the following properties:
+
+- `loading`: Whether data has been returned by the query.
+- `docs`: The query results as an array of document references.
+- `data`: The query results as an array of data (same as calling `docs.map(d => d.data)`).
+- `error`: The error object, if an error occurs while executing the query.
+
 ```jsx
 function App() {
-  const collection = useCollection('my-collection');
+  const collection = useCollection<User>('users');
 
   /**
    * The list of docs will be streamed to the client and will be
    * kept up-to-date.
    */
-  const docs = useQuery(
+  const { docs } = useQuery(
     collection.query().where('foo', '>', 'bar'),
     true /* subscribe */,
   );
@@ -128,42 +132,55 @@ streamed.
 
 #### useDoc
 
-The `useDoc`hooks provides similar functionality, but instead of subscribing to a query, you subscribe to updates to a
-particular document. In this case the return value of the hook is not needed since you already have access to the
-document reference and its data:
+The `useDoc` hook provides similar functionality, but instead of subscribing to a query, you subscribe to updates to a
+particular document.
+
+The hook returns an object that includes the following properties:
+
+- `loading`: Whether data has been returned by the document query.
+- `doc`: The document reference.
+- `data`: The document data (same as calling `doc.data`). This can be undefined if no data has been received or if the document has been deleted. 
+- `error`: The error object, if an error occurs while querying for the document.
 
 ```jsx
 function App() {
-  const collection = useCollection('my-collection');
+  const collection = useCollection<User>('users');
   const doc = collection.doc('my-id');
 
   /**
-   * Changes to th doc will be streamed to the client and it will be
+   * Changes to the doc will be streamed to the client and it will be
    * kept up-to-date.
    */
-  useDoc(doc, true /* subscribe */);
+  const { data } = useDoc(doc, true /* subscribe */);
 
-  return <span>{doc.data.foo}</span>;
+  return <span>{data.foo}</span>;
 }
 ```
 
-The same applies for `useDocs`, which can provide updates for multiple document references:
+The same applies for `useDocs`, which can provide updates for multiple document references.
+
+The hook returns an object that includes the following properties:
+
+- `loading`: Whether data has been returned by _all_ document queries.
+- `docs`: The array of document references.
+- `data`: An array of document data (same as calling `docs.map(d => d.data)`). An element in the array be undefined if no data has been received or if the document has been deleted.
+- `error`: The error object, if an error occurs while querying for _any_ of the documents.
 
 ```jsx
 function App() {
-  const collection = useCollection('my-collection');
+  const collection = useCollection<User>('users');
   const docs = [collection.doc('my-id-1'), collection.doc('my-id-2')];
 
   /**
-   * Changes to th documents will be streamed to the client and they will be
+   * Changes to the documents will be streamed to the client and they will be
    * kept up-to-date.
    */
-  useDocs(docs, true /* subscribe */);
+  const { data } = useDocs(docs, true /* subscribe */);
 
   return (
     <ul>
-      <li>{docs[0].data.foo}</li>
-      <li>{docs[1].data.foo}</li>
+      <li>{data[0].foo}</li>
+      <li>{data[1].foo}</li>
     </ul>
   );
 }
@@ -196,7 +213,7 @@ function App() {
 
   const { loading, data, error, complete } = useObservable(
     squid
-      .collection('my-collection')
+      .collection<User>('users')
       .query()
       .where('foo', '>', bar)
       .snapshots(),
@@ -210,6 +227,16 @@ Optionally, the hook can also accept an `initialValue` (defaults to `null`) and 
 changes, the current observable will unsubscribe, and a new subscription will be created. In the example above, you
 can see the `where` condition of the query relies on the `bar` variable. To ensure that the query is properly updated
 when `bar` changes, we need to pass it as a dependency.
+
+Whenever the `deps` change, `loading` is reset to true until a value is emitted from the newly created observable.
+
+In addition to passing an observable directly to the `useObservable` hook, you can also pass a function that returns an observable.
+
+```typescript
+const { data } = useObservable(() => from(query.snapshot()));
+```
+
+This can be useful if you have an observable that begins emitting values before calling `subscribe`. Passing a function ensures that the observable will be only created when first calling the hook, or when there's a change in `deps`.
 
 #### usePromise
 
@@ -229,7 +256,7 @@ function App() {
   const { loading, data, error } = usePromise(
     () => {
       return squid
-        .collection('my-collection')
+        .collection<User>('users')
         .query()
         .where('foo', '>', bar)
         .snapshot();
@@ -240,7 +267,7 @@ function App() {
 }
 ```
 
-The hook can also take an `initialValue` (defaults to `null`) and ` deps` array. Whenever the `deps` change, the result of
+The hook can also take an `initialValue` (defaults to `null`) and `deps` array. Whenever the `deps` change, the result of
 the ongoing promise will be ignored, and a new promise will be created. In the example above, a new promise is created
 each time the `bar` variable changes.
 
