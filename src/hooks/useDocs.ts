@@ -1,56 +1,40 @@
 import { DocumentReference } from '@squidcloud/client';
 import { DocumentData } from '@squidcloud/common';
-import { useEffect, useRef, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { useEffect, useState } from 'react';
+import { combineLatest } from 'rxjs';
 
-const usePrevious = <T>(value: T): T | undefined => {
-  const ref = useRef<T>();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
+export type DocsType<T extends DocumentData> = {
+  loading: boolean;
+  docs: Array<DocumentReference<T>>;
+  data: Array<T | undefined>;
+  error: any;
 };
 
-export function useDocs<T extends DocumentData>(
-  docs: Array<DocumentReference<T>>,
-  subscribe = false,
-): Array<DocumentReference<T>> {
-  const prevDocs = usePrevious<Array<DocumentReference<T>>>(docs);
-  const subscriptions = useRef<Map<DocumentReference<T>, Subscription>>(new Map());
-  const [_, refresh] = useState<[]>([]);
+export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>>, subscribe = false): DocsType<T> {
+  const [loading, setLoading] = useState<boolean>(!!docs.length);
+  const [data, setData] = useState<Array<T | undefined>>([]);
+  const [error, setError] = useState<any>(null);
 
   useEffect(() => {
-    const docsAdded = docs.filter((x) => prevDocs?.indexOf(x) === -1);
-    const docsRemoved = prevDocs?.filter((x) => docs.indexOf(x) === -1) || [];
+    setLoading(!!docs.length);
 
-    docsRemoved.forEach((doc) => {
-      const subscription = subscriptions.current.get(doc);
-      subscription?.unsubscribe();
-      subscriptions.current.delete(doc);
+    const observables = docs.map((doc) => (subscribe ? doc.snapshots() : doc.snapshot()));
+
+    const subscription = combineLatest(observables).subscribe({
+      next: (value: Array<DocumentReference<T> | undefined>) => {
+        setData(value.map((d) => d?.data));
+        setLoading(false);
+      },
+      error: (err) => {
+        setError(err);
+        setLoading(false);
+      },
     });
 
-    if (subscribe) {
-      docsAdded.forEach((doc) => {
-        const subscription = doc.snapshots().subscribe(() => {
-          refresh([]);
-        });
-        subscriptions.current.set(doc, subscription);
-      });
-    } else {
-      Promise.all(docsAdded.map((doc) => doc.snapshot())).then(() => {
-        refresh([]);
-      });
-    }
-  }, [docs, prevDocs, subscribe]);
-
-  useEffect(() => {
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      for (const [_, subscription] of subscriptions.current) {
-        subscription.unsubscribe();
-      }
+      setTimeout(() => subscription.unsubscribe(), 0);
     };
-  }, []);
+  }, [docs, subscribe]);
 
-  return docs;
+  return { loading, error, docs, data };
 }

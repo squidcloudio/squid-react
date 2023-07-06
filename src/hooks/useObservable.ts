@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Observable } from 'rxjs';
+import { defer, Observable } from 'rxjs';
 
 export type ObservableType<T> = {
   loading: boolean;
@@ -30,7 +30,10 @@ export function useObservable<T>(
     complete: false,
   });
 
-  const observableMemo = useMemo(() => (typeof observable === 'function' ? observable() : observable), deps);
+  const observableMemo = useMemo(
+    () => (typeof observable === 'function' ? defer(() => observable()) : observable),
+    deps,
+  );
 
   useEffect(() => {
     // Set loading state to true when the observable changes

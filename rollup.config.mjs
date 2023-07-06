@@ -5,14 +5,14 @@ import polyfills from 'rollup-plugin-node-polyfills';
 
 import terser from '@rollup/plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
-import commonjs from "@rollup/plugin-commonjs"
-import json from "@rollup/plugin-json";
+import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
 
-import pkg from './package.json' assert {type: 'json'};
+import pkg from './package.json' assert { type: 'json' };
 
 const input = 'src/index.ts';
 const plugins = [
-  del({targets: 'dist/*', runOnce: true}),
+  del({ targets: 'dist/*', runOnce: true }),
   typescript(),
   external(),
   resolve(),
@@ -24,10 +24,7 @@ const plugins = [
 
 export default [
   {
-    external: [
-      '@squidcloud/client',
-      '@squidcloud/common'
-    ],
+    external: ['@squidcloud/client', '@squidcloud/common'],
     input,
     output: [
       {
@@ -42,5 +39,5 @@ export default [
       },
     ],
     plugins,
-  }
+  },
 ];

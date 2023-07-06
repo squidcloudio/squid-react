@@ -99,7 +99,7 @@ type QueryProps = {
 const Docs = <T,>(): JSX.Element => {
   const [docs, setDocs] = useState<Array<DocumentReference<Person>>>([]);
   const collection = useCollection<Person>('people');
-  useDocs(docs, true);
+  const { loading } = useDocs(docs, true);
 
   function add(): void {
     const doc = collection.doc();
@@ -119,30 +119,34 @@ const Docs = <T,>(): JSX.Element => {
     <div style={{ width: '200px', margin: '16px' }}>
       <h3>Docs</h3>
       <button onClick={add}>Add</button>
-      <ul>
-        {docs.map((d) => {
-          return (
-            <li key={d.refId}>
-              {d.hasData ? (
-                <>
-                  <span>
-                    {d.data.name} {d.data.age}
-                  </span>
-                  <button onClick={(): void => remove(d)}>X</button>
-                </>
-              ) : (
-                'Missing Data'
-              )}
-            </li>
-          );
-        })}
-      </ul>
+      {loading ? (
+        <span>Loading...</span>
+      ) : (
+        <ul>
+          {docs.map((d) => {
+            return (
+              <li key={d.refId}>
+                {d.hasData ? (
+                  <>
+                    <span>
+                      {d.data.name} {d.data.age}
+                    </span>
+                    <button onClick={(): void => remove(d)}>X</button>
+                  </>
+                ) : (
+                  'Missing Data'
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 };
 
 const Query = ({ query, description }: QueryProps): JSX.Element => {
-  const docs = useQuery(query, true);
+  const { loading, docs } = useQuery(query, true);
 
   function update(): void {
     for (const doc of docs) {
@@ -161,15 +165,19 @@ const Query = ({ query, description }: QueryProps): JSX.Element => {
       <h3>{description}</h3>
       <button onClick={update}>Update</button>
       <button onClick={remove}>Delete</button>
-      <ul>
-        {docs.map((d) => {
-          return (
-            <li key={d.refId}>
-              {d.data.name} {d.data.age}
-            </li>
-          );
-        })}
-      </ul>
+      {loading ? (
+        <span>Loading...</span>
+      ) : (
+        <ul>
+          {docs.map((d) => {
+            return (
+              <li key={d.refId}>
+                {d.data.name} {d.data.age}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 };
