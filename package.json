@@ -1,6 +1,6 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Squid React SDK",
   "main": "dist/index.cjs.js",
   "types": "dist/src/index.d.ts",
@@ -54,7 +54,7 @@
     "rollup-plugin-typescript2": "^0.34.1"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.77",
-    "@squidcloud/common": "^1.0.59"
+    "@squidcloud/client": "^1.0.78",
+    "@squidcloud/common": "^1.0.60"
   }
 }
