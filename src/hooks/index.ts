@@ -5,3 +5,4 @@ export * from './useQuery';
 export * from './useSquid';
 export * from './usePromise';
 export * from './useObservable';
+export * from './usePagination';

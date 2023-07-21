@@ -3,13 +3,14 @@ import { useCollection, useDoc, useDocs, useQuery } from '@squidcloud/react';
 import { debounce } from 'debounce';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { Names } from './data/names';
+import Pages from "./Pages";
 
-type Person = {
+export type Person = {
   name: string;
   age: number;
 };
 
-type Event = {
+export type Event = {
   name: string;
   value: number;
 };
@@ -80,6 +81,7 @@ function App(): JSX.Element {
               description={`<= ${age}`}
             />
           </div>
+          <Pages />
         </div>
       )}
       <button style={{ marginTop: '32px' }} onClick={toggle}>

@@ -5,8 +5,8 @@ import { useObservable } from './useObservable';
 
 export type DocType<T extends DocumentData> = {
   loading: boolean;
-  doc: DocumentReference<T>
-  data: T | undefined,
+  doc: DocumentReference<T>;
+  data: T | undefined;
   error: any;
 };
 
