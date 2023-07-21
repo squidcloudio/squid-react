@@ -1,15 +1,16 @@
 import { DocumentReference, QueryBuilder } from '@squidcloud/client';
-import { useCollection, useDoc, useDocs, useQuery } from '@squidcloud/react';
-import { debounce } from 'debounce';
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { useCollection, useDocs, useQuery } from '@squidcloud/react';
+import { useState } from 'react';
+import Pages from './components/Pages';
+import Slider from './components/Slider';
 import { Names } from './data/names';
 
-type Person = {
+export type Person = {
   name: string;
   age: number;
 };
 
-type Event = {
+export type Event = {
   name: string;
   value: number;
 };
@@ -25,61 +26,44 @@ function randomName(): string {
 function App(): JSX.Element {
   const [hide, setHide] = useState(false);
 
-  const collection = useCollection<Person>('people');
+  const people = useCollection<Person>('people');
   const events = useCollection<Event>('events');
-
-  const slider = events.doc('slider');
-  useDoc(slider, true);
-  const age = slider.hasData ? slider.data.value : 30;
-
-  useEffect(() => {
-    const createSlider = async (): Promise<void> => {
-      const data = await slider.snapshot();
-      if (!data) {
-        await slider.insert({ name: 'slider', value: 30 });
-      }
-    };
-    createSlider().then();
-  }, []);
-
-  const debounceSetAge = useCallback(
-    debounce((value: string) => {
-      slider.update({ value: Number(value) }).then();
-    }, 200),
-    [],
-  );
-
-  function onSliderChange(e: ChangeEvent<HTMLInputElement>): void {
-    debounceSetAge(e.target.value);
-  }
+  const { loading, data } = useQuery(events.query().eq('name', 'slider'), true);
 
   function toggle(): void {
     setHide(!hide);
   }
 
+  if (loading) {
+    return <span>Loading...</span>;
+  }
+
+  const age = data[0].value;
+
   return (
     <div>
       {!hide && (
-        <div>
-          <input
-            type="range"
-            min="1"
-            max="99"
-            value={age}
-            onChange={onSliderChange}
-          />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Slider name="slider" min={1} max={99} defaultValue={30} />
           <div style={{ display: 'flex' }}>
             <Docs />
-            <Query query={collection.query()} description="All" />
+            <Query query={people.query()} description="All" />
             <Query
-              query={collection.query().where('age', '>', age)}
+              query={people.query().where('age', '>', age)}
               description={`> ${age}`}
             />
             <Query
-              query={collection.query().where('age', '<=', age)}
+              query={people.query().where('age', '<=', age)}
               description={`<= ${age}`}
             />
           </div>
+          <Pages />
         </div>
       )}
       <button style={{ marginTop: '32px' }} onClick={toggle}>

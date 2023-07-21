@@ -1,6 +1,6 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Squid React SDK",
   "main": "dist/index.cjs.js",
   "types": "dist/src/index.d.ts",
@@ -45,6 +45,7 @@
     "eslint-plugin-unused-imports": "^2.0.0",
     "npm-check-updates": "^16.10.8",
     "prettier": "^2.8.4",
+    "prettier-plugin-organize-imports": "^3.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rollup": "^3.18.0",
@@ -54,7 +55,7 @@
     "rollup-plugin-typescript2": "^0.34.1"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.80",
-    "@squidcloud/common": "^1.0.62"
+    "@squidcloud/client": "^1.0.87",
+    "@squidcloud/common": "^1.0.69"
   }
 }
