@@ -103,7 +103,7 @@ The hook returns an object that includes the following properties:
 - `data`: The query results as an array of data (same as calling `docs.map(d => d.data)`).
 - `error`: The error object, if an error occurs while executing the query.
 
-```jsx
+```tsx
 function App() {
   const collection = useCollection<User>('users');
 
@@ -130,6 +130,60 @@ If `subscribe` is set to true, data will be streamed to the client and the compo
 new updates are received. If `subscribe` is false, the initial data is fetched for the query, but no changes are
 streamed.
 
+#### usePagination
+
+The `usePagination` hook is used to paginate through query results. It provides an easy-to-use interface to handle pagination and keep the data up-to-date with changes. For more information on pagination in Squid, check out our [pagination documentation](https://docs.squid.cloud/docs/client-sdk/queries#pagination).
+
+The hook returns an object that includes the following properties:
+
+- `loading`: Whether data is currently being loaded or paginated.
+- `docs`: The paginated results as an array of document references.
+- `data`: The paginated results as an array of data (same as calling docs.map(d => d.data)).
+
+- `hasNext`: A boolean indicating if there are more results available after the current page.
+- `hasPrev`: A boolean indicating if there are more results available before the current page.
+- `next`: A function to load the next page of results (only active when `hasNext` is true).
+- `prev`: A function to load the previous page of results (only active when `hasPrev` is true).
+
+```tsx
+function App() {
+  const collection = useCollection<User>('users');
+
+  /**
+   * Paginate through the list of users.
+   * The list of docs will be streamed to the client and will be kept up-to-date.
+   */
+  const { docs, loading, hasNext, hasPrev, next, prev } = usePagination(
+    collection.query().sortBy('name'),
+    { subscribe: true, pageSize: 10 } /* PaginationOptions */,
+  );
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <ul>
+        {docs.map((d) => (
+          <li key={d.refId}>{d.data.name}</li>
+        ))}
+      </ul>
+      <button onClick={prev} disabled={!hasPrev}>
+        Previous
+      </button>
+      <button onClick={next} disabled={!hasNext}>
+        Next
+      </button>
+    </div>
+  );
+}
+```
+
+If `subscribe` is set to true, data will be streamed to the client and the component will automatically re-render when new updates are received. If new data is added between the first and last item on your page, your page will automatically update to show the new data, ensuring that only `pageSize` items are visible.
+
+To use pagination, your query must specify a `sortBy`.
+
 #### useDoc
 
 The `useDoc` hook provides similar functionality, but instead of subscribing to a query, you subscribe to updates to a
@@ -139,10 +193,10 @@ The hook returns an object that includes the following properties:
 
 - `loading`: Whether data has been returned by the document query.
 - `doc`: The document reference.
-- `data`: The document data (same as calling `doc.data`). This can be undefined if no data has been received or if the document has been deleted. 
+- `data`: The document data (same as calling `doc.data`). This can be undefined if no data has been received or if the document has been deleted.
 - `error`: The error object, if an error occurs while querying for the document.
 
-```jsx
+```tsx
 function App() {
   const collection = useCollection<User>('users');
   const doc = collection.doc('my-id');
@@ -166,7 +220,7 @@ The hook returns an object that includes the following properties:
 - `data`: An array of document data (same as calling `docs.map(d => d.data)`). An element in the array be undefined if no data has been received or if the document has been deleted.
 - `error`: The error object, if an error occurs while querying for _any_ of the documents.
 
-```jsx
+```tsx
 function App() {
   const collection = useCollection<User>('users');
   const docs = [collection.doc('my-id-1'), collection.doc('my-id-2')];
@@ -206,17 +260,13 @@ returns an object that includes the following properties:
 - `error`: The error object, if the observable encounters an error.
 - `complete`: Whether the observable has completed.
 
-```typescript
+```tsx
 function App() {
   const [bar, setBar] = useState('bar');
   const squid = useSquid();
 
   const { loading, data, error, complete } = useObservable(
-    squid
-      .collection<User>('users')
-      .query()
-      .where('foo', '>', bar)
-      .snapshots(),
+    squid.collection<User>('users').query().where('foo', '>', bar).snapshots(),
     [], // initialValue
     [bar], // deps
   );
@@ -248,7 +298,7 @@ until the component mounts.
 - `data`: The data resolved by the promise.
 - `error`: The error object, if the promise rejected.
 
-```typescript
+```tsx
 function App() {
   const [bar, setBar] = useState('bar');
   const squid = useSquid();
