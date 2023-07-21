@@ -1,5 +1,5 @@
-import { DocumentData, Pagination, PaginationState } from '@squidcloud/common';
 import { DocumentReference, QueryBuilder } from '@squidcloud/client';
+import { DocumentData, Pagination, PaginationOptions, PaginationState } from '@squidcloud/common';
 import { useEffect, useRef, useState } from 'react';
 
 export type PaginationType<T extends DocumentData> = {
@@ -14,8 +14,7 @@ export type PaginationType<T extends DocumentData> = {
 
 export function usePagination<T extends DocumentData>(
   query: QueryBuilder<T>,
-  subscribe?: boolean,
-  pageSize?: number,
+  options: PaginationOptions,
 ): PaginationType<T> {
   const pagination = useRef<Pagination<DocumentReference<T>> | null>(null);
   const [paginationState, setPaginationState] = useState<PaginationState<DocumentReference<T>>>({
@@ -33,8 +32,17 @@ export function usePagination<T extends DocumentData>(
       hasPrev: false,
     }));
 
-    pagination.current = query.paginate({ subscribe, pageSize });
-    let subscription = pagination.current.observeState().subscribe(setPaginationState);
+    pagination.current = query.paginate(options);
+    let subscription = pagination.current.observeState().subscribe((state) => {
+      if (!state.isLoading) {
+        setPaginationState(state);
+      } else {
+        setPaginationState((prevState) => ({
+          ...state,
+          data: prevState.data,
+        }));
+      }
+    });
 
     return () => {
       const prevPagination = pagination.current;
@@ -43,7 +51,7 @@ export function usePagination<T extends DocumentData>(
         subscription.unsubscribe();
       }, 0);
     };
-  }, [query.hash, subscribe, pageSize]);
+  }, [query.hash, JSON.stringify(options)]);
 
   const { isLoading, data, hasNext, hasPrev } = paginationState;
 

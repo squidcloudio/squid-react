@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { defer, Observable } from 'rxjs';
+import { Observable, defer } from 'rxjs';
 
 export type ObservableType<T> = {
   loading: boolean;
