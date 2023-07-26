@@ -137,8 +137,7 @@ The `usePagination` hook is used to paginate through query results. It provides 
 The hook returns an object that includes the following properties:
 
 - `loading`: Whether data is currently being loaded or paginated.
-- `docs`: The paginated results as an array of document references.
-- `data`: The paginated results as an array of data (same as calling docs.map(d => d.data)).
+- `data`: The paginated results as an array. This may be document references, document data, join query results, etc, depending on the type of query that is passed to the hook.
 
 - `hasNext`: A boolean indicating if there are more results available after the current page.
 - `hasPrev`: A boolean indicating if there are more results available before the current page.
@@ -154,8 +153,9 @@ function App() {
    * The list of docs will be streamed to the client and will be kept up-to-date.
    */
   const { docs, loading, hasNext, hasPrev, next, prev } = usePagination(
-    collection.query().sortBy('name'),
+    collection.query().eq('foo', bar).sortBy('name'),
     { subscribe: true, pageSize: 10 } /* PaginationOptions */,
+    [bar], // deps
   );
 
   if (loading) {
@@ -183,6 +183,8 @@ function App() {
 If `subscribe` is set to true, data will be streamed to the client and the component will automatically re-render when new updates are received. If new data is added between the first and last item on your page, your page will automatically update to show the new data, ensuring that only `pageSize` items are visible.
 
 To use pagination, your query must specify a `sortBy`.
+
+Optionally, the hook can also accept a `deps` array. When the deps array changes, a new pagination query will be created.
 
 #### useDoc
 

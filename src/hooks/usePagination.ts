@@ -1,10 +1,8 @@
-import { DocumentReference, QueryBuilder } from '@squidcloud/client';
-import { DocumentData, Pagination, PaginationOptions, PaginationState } from '@squidcloud/common';
+import { Pagination, PaginationOptions, PaginationState, SnapshotEmitter } from '@squidcloud/common';
 import { useEffect, useRef, useState } from 'react';
 
-export type PaginationType<T extends DocumentData> = {
+export type PaginationType<T> = {
   loading: boolean;
-  docs: Array<DocumentReference<T>>;
   data: Array<T>;
   hasNext: boolean;
   hasPrev: boolean;
@@ -12,12 +10,13 @@ export type PaginationType<T extends DocumentData> = {
   prev: () => void;
 };
 
-export function usePagination<T extends DocumentData>(
-  query: QueryBuilder<T>,
+export function usePagination<T>(
+  query: SnapshotEmitter<T>,
   options: PaginationOptions,
+  deps: ReadonlyArray<unknown> = [],
 ): PaginationType<T> {
-  const pagination = useRef<Pagination<DocumentReference<T>> | null>(null);
-  const [paginationState, setPaginationState] = useState<PaginationState<DocumentReference<T>>>({
+  const pagination = useRef<Pagination<T> | null>(null);
+  const [paginationState, setPaginationState] = useState<PaginationState<T>>({
     isLoading: true,
     data: [],
     hasNext: false,
@@ -51,14 +50,13 @@ export function usePagination<T extends DocumentData>(
         subscription.unsubscribe();
       }, 0);
     };
-  }, [query.hash, JSON.stringify(options)]);
+  }, [JSON.stringify(deps), JSON.stringify(options)]);
 
   const { isLoading, data, hasNext, hasPrev } = paginationState;
 
   return {
     loading: isLoading,
-    docs: data,
-    data: data.map((d) => d.data),
+    data,
     hasNext,
     hasPrev,
     next: () => !isLoading && pagination.current?.next(),
