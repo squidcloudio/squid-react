@@ -55,7 +55,7 @@
     "rollup-plugin-typescript2": "^0.34.1"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.87",
-    "@squidcloud/common": "^1.0.69"
+    "@squidcloud/client": "^1.0.88",
+    "@squidcloud/common": "^1.0.70"
   }
 }

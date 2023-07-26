@@ -1,6 +1,5 @@
-import { usePagination, useCollection, useQuery } from '@squidcloud/react';
+import { useCollection, usePagination, useQuery } from '@squidcloud/react';
 import { Event, Person } from '../App';
-import React from 'react';
 import Slider from './Slider';
 
 const Pages = () => {
@@ -12,13 +11,16 @@ const Pages = () => {
     true,
   );
 
-  const { docs, hasNext, hasPrev, next, prev } = usePagination(
-    people.query().sortBy('age'),
-    {
-      subscribe: true,
-      pageSize: data[0]?.value || 5,
-    },
-  );
+  const {
+    data: docs,
+    hasNext,
+    hasPrev,
+    next,
+    prev,
+  } = usePagination(people.query().sortBy('age'), {
+    subscribe: true,
+    pageSize: data[0]?.value || 5,
+  });
 
   if (loadPageCount || !docs.length) {
     return <span>Loading...</span>;
