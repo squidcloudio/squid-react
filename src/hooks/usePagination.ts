@@ -10,13 +10,15 @@ export type PaginationType<T> = {
   prev: () => void;
 };
 
+type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
+
 export function usePagination<T>(
-  query: SnapshotEmitter<T>,
+  query: T & SnapshotEmitter<any>,
   options: PaginationOptions,
   deps: ReadonlyArray<unknown> = [],
-): PaginationType<T> {
-  const pagination = useRef<Pagination<T> | null>(null);
-  const [paginationState, setPaginationState] = useState<PaginationState<T>>({
+): PaginationType<GetReturnType<T>> {
+  const pagination = useRef<Pagination<GetReturnType<T>> | null>(null);
+  const [paginationState, setPaginationState] = useState<PaginationState<GetReturnType<T>>>({
     isLoading: true,
     data: [],
     hasNext: false,
