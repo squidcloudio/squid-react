@@ -1,8 +1,8 @@
+import { SupportedSquidRegion } from '@squidcloud/common';
 import { SquidContextProvider } from '@squidcloud/react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import { SupportedSquidRegion } from '@squidcloud/common';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <SquidContextProvider
@@ -11,6 +11,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       region: import.meta.env.VITE_SQUID_REGION as SupportedSquidRegion,
       environmentId: 'dev',
       squidDeveloperId: import.meta.env.VITE_SQUID_DEVELOPER_ID,
+      apiKey: 'appApiKeyHere',
     }}
   >
     <App />

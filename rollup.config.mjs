@@ -31,12 +31,12 @@ export default [
     external: ['@squidcloud/client', '@squidcloud/common'],
     input,
     output: [
-      // {
-      //   preserveModules: true,
-      //   dir: 'dist/cjs',
-      //   format: 'cjs',
-      //   sourcemap: true,
-      // },
+      {
+        preserveModules: true,
+        dir: 'dist/cjs',
+        format: 'cjs',
+        sourcemap: true,
+      },
       {
         preserveModules: true,
         dir: 'dist',

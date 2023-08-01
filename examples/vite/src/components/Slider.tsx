@@ -1,6 +1,6 @@
-import { ChangeEvent, useCallback, useEffect } from 'react';
-import { useDoc, useCollection } from '@squidcloud/react';
+import { useCollection, useDoc } from '@squidcloud/react';
 import { debounce } from 'debounce';
+import { ChangeEvent, useCallback, useEffect } from 'react';
 import { Event } from '../App';
 
 type PropTypes = {
