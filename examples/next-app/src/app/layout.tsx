@@ -24,7 +24,6 @@ export default function RootLayout({
             appId: process.env.NEXT_PUBLIC_SQUID_APP_ID,
             region: process.env
               .NEXT_PUBLIC_SQUID_REGION as SupportedSquidRegion,
-            apiKey: 'appApiKeyHere',
             environmentId: 'dev',
             squidDeveloperId: process.env.NEXT_PUBLIC_SQUID_DEVELOPER_ID,
           }}

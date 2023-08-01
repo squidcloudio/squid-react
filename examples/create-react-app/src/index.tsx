@@ -17,7 +17,6 @@ root.render(
         region: process.env.REACT_APP_SQUID_REGION as SupportedSquidRegion,
         environmentId: 'dev',
         squidDeveloperId: process.env.REACT_APP_SQUID_DEVELOPER_ID,
-        apiKey: 'appApiKeyHere',
       }}
     >
       <App />
