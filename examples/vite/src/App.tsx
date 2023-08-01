@@ -3,7 +3,7 @@ import { useCollection, useDocs, useQuery } from '@squidcloud/react';
 import { useState } from 'react';
 import Pages from './components/Pages';
 import Slider from './components/Slider';
-import { Names } from './data/names';
+import { randomAge, randomName } from './data/names';
 
 export type Person = {
   name: string;
@@ -14,14 +14,6 @@ export type Event = {
   name: string;
   value: number;
 };
-
-function randomAge(): number {
-  return Math.ceil(Math.random() * 99);
-}
-
-function randomName(): string {
-  return Names[Math.floor(Math.random() * Names.length)];
-}
 
 function App(): JSX.Element {
   const [hide, setHide] = useState(false);

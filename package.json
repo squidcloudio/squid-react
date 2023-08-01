@@ -2,9 +2,8 @@
   "name": "@squidcloud/react",
   "version": "1.0.17",
   "description": "Squid React SDK",
-  "main": "dist/index.cjs.js",
-  "types": "dist/src/index.d.ts",
-  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.js",
   "scripts": {
     "build": "rollup -c",
     "build:examples": "npm --workspace=examples install && npm --workspace=examples run build",
@@ -16,9 +15,6 @@
   },
   "files": [
     "dist/**/*"
-  ],
-  "workspaces": [
-    "examples/*"
   ],
   "keywords": [
     "Squid",
@@ -40,8 +36,8 @@
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "eslint": "^8.35.0",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-config-next": "13.4.12",
+    "eslint-plugin-react": "^7.33.1",
     "eslint-plugin-unused-imports": "^2.0.0",
     "npm-check-updates": "^16.10.8",
     "prettier": "^2.8.4",
@@ -52,10 +48,11 @@
     "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-preserve-directives": "^0.2.0",
     "rollup-plugin-typescript2": "^0.34.1"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.88",
-    "@squidcloud/common": "^1.0.70"
+    "@squidcloud/client": "^1.0.89",
+    "@squidcloud/common": "^1.0.71"
   }
 }

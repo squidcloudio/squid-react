@@ -11,6 +11,7 @@
     "jsx": "react-jsx",
     "baseUrl": "src",
     "outDir": "./dist",
+    "rootDir": "src",
     "declaration": true,
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,

@@ -1,3 +1,11 @@
+export function randomAge(): number {
+  return Math.ceil(Math.random() * 99);
+}
+
+export function randomName(): string {
+  return Names[Math.floor(Math.random() * Names.length)];
+}
+
 export const Names = [
   'London',
   'Alyse',

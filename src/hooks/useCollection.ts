@@ -1,3 +1,5 @@
+'use client';
+
 import { CollectionReference } from '@squidcloud/client';
 import { CollectionName, DocumentData, IntegrationId } from '@squidcloud/common';
 import React from 'react';
