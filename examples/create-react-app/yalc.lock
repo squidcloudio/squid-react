@@ -1,9 +1,0 @@
-{
-  "version": "v1",
-  "packages": {
-    "@squidcloud/react": {
-      "signature": "634c04fc67d9801dd13724bb9777d5b9",
-      "file": true
-    }
-  }
-}
