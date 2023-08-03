@@ -1,7 +1,7 @@
-import Users from "./components/Users";
+import Users from './components/Users';
 
 function App() {
-  return <Users title={"Users"} />
+  return <Users title={'Users'} />;
 }
 
 export default App;
