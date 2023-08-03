@@ -27,7 +27,7 @@ const Users = ({ title, initialData }: PropTypes) => {
   };
 
   const insertFromApi = () => {
-    fetch('/api/insertUser', {
+    fetch('/api/insertUserFromApi', {
       method: 'POST',
     }).then();
   };

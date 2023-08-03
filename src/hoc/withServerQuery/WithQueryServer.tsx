@@ -1,6 +1,6 @@
 import { SnapshotEmitter } from '@squidcloud/common';
 import React from 'react';
-import Client from './Client';
+import WithQueryClient from './WithQueryClient';
 import { WithQueryProps } from './index';
 
 type PropTypes<C extends React.ComponentType<any>, T> = {
@@ -28,7 +28,7 @@ const WithQueryServer = async <C extends React.ComponentType<any>, T>({
   }
 
   return (
-    <Client
+    <WithQueryClient
       serializedQuery={query.serialize()}
       props={props}
       data={data}

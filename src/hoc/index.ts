@@ -1,1 +1,1 @@
-export * from './withServeryQuery';
+export * from './withServerQuery';

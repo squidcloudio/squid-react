@@ -13,7 +13,7 @@ type PropTypes<C extends React.ComponentType<any>, T> = {
   data: Array<T>;
 };
 
-const WithClientQuery = <C extends React.ComponentType<any>, T>({
+const WithQueryClient = <C extends React.ComponentType<any>, T>({
   Component,
   props,
   serializedQuery,
@@ -34,4 +34,4 @@ const WithClientQuery = <C extends React.ComponentType<any>, T>({
   return <Component {...propsWithData} />;
 };
 
-export default WithClientQuery;
+export default WithQueryClient;

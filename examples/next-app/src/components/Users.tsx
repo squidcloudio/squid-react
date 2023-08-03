@@ -1,6 +1,6 @@
 'use client';
 
-import insertUser from '@/actions/insertUser';
+import insertFromServerAction from '@/actions/insertFromServerAction';
 import { randomAge, randomName } from '@/data/names';
 import { WithQueryProps, useCollection } from '@squidcloud/react';
 
@@ -23,6 +23,12 @@ const Users = ({ title, data }: PropTypes & WithQueryProps<Person>) => {
     });
   };
 
+  const insertFromApi = () => {
+    fetch('api/insertFromApi', {
+      method: 'POST',
+    }).then();
+  };
+
   return (
     <div className="flex flex-col min-h-screen min-w-screen justify-center items-center">
       <h1>{title}</h1>
@@ -34,7 +40,8 @@ const Users = ({ title, data }: PropTypes & WithQueryProps<Person>) => {
         ))}
       </ul>
       <button onClick={insertFromClient}>Insert from Client</button>
-      <form action={() => insertUser()}>
+      <button onClick={insertFromApi}>Insert from API</button>
+      <form action={insertFromServerAction}>
         <button type="submit">Insert from Server Action</button>
       </form>
     </div>
