@@ -1,3 +1,5 @@
+'use client';
+
 import { Squid } from '@squidcloud/client';
 import React from 'react';
 import { SquidContext } from '../context';

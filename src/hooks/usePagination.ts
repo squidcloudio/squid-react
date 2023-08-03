@@ -1,3 +1,5 @@
+'use client';
+
 import { Pagination, PaginationOptions, PaginationState, SnapshotEmitter } from '@squidcloud/common';
 import { useEffect, useRef, useState } from 'react';
 

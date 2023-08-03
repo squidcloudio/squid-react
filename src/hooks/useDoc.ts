@@ -1,3 +1,5 @@
+'use client';
+
 import { DocumentReference } from '@squidcloud/client';
 import { DocumentData } from '@squidcloud/common';
 import { from } from 'rxjs';

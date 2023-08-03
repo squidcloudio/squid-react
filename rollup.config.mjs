@@ -1,14 +1,13 @@
 import del from 'rollup-plugin-delete';
-import typescript from 'rollup-plugin-typescript2';
-import external from 'rollup-plugin-peer-deps-external';
 import polyfills from 'rollup-plugin-node-polyfills';
+import external from 'rollup-plugin-peer-deps-external';
+import typescript from 'rollup-plugin-typescript2';
 
-import terser from '@rollup/plugin-terser';
-import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-
-import pkg from './package.json' assert { type: 'json' };
+import resolve from '@rollup/plugin-node-resolve';
+import terser from '@rollup/plugin-terser';
+import preserveDirectives from 'rollup-plugin-preserve-directives';
 
 const input = 'src/index.ts';
 const plugins = [
@@ -19,7 +18,12 @@ const plugins = [
   commonjs(),
   polyfills(),
   json(),
-  terser(),
+  terser({
+    compress: { directives: false },
+  }),
+  preserveDirectives({
+    supressPreserveModulesWarning: true,
+  }),
 ];
 
 export default [
@@ -28,16 +32,24 @@ export default [
     input,
     output: [
       {
-        file: pkg.main,
+        preserveModules: true,
+        dir: 'dist/cjs',
         format: 'cjs',
         sourcemap: true,
       },
       {
-        file: pkg.module,
+        preserveModules: true,
+        dir: 'dist',
         format: 'esm',
         sourcemap: true,
       },
     ],
     plugins,
+    onwarn(warning, warn) {
+      if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
+        return;
+      }
+      warn(warning);
+    },
   },
 ];

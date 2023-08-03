@@ -1,3 +1,5 @@
+'use client';
+
 import { Squid, SquidOptions } from '@squidcloud/client';
 import React, { useRef } from 'react';
 import { SquidContextType } from '../types';
