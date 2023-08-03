@@ -2,34 +2,34 @@
 
 import { deserializeQuery } from '@squidcloud/client';
 import { SerializedQuery } from '@squidcloud/common';
-import React from 'react';
+import React, {ComponentType} from 'react';
 import { useObservable, useSquid } from '../../hooks';
-import { WithQueryProps } from './index';
+import { AddQueryProps } from './index';
 
-type PropTypes<C extends React.ComponentType<any>, T> = {
-  Component: C;
-  props: Omit<React.ComponentProps<C>, keyof WithQueryProps<T>>;
+type PropTypes<Props, DataType> = {
+  Component: ComponentType<AddQueryProps<Props, DataType>>;
+  props: Props;
   serializedQuery: SerializedQuery;
-  data: Array<T>;
+  data: Array<DataType>;
 };
 
-const WithQueryClient = <C extends React.ComponentType<any>, T>({
+const WithQueryClient = <Props, DataType>({
   Component,
   props,
   serializedQuery,
   data,
-}: PropTypes<C, T>) => {
+}: PropTypes<Props, DataType>) => {
   const squid = useSquid();
 
   const { data: currentData } = useObservable(
-    deserializeQuery<T>(squid, serializedQuery).snapshots(),
+    deserializeQuery<DataType>(squid, serializedQuery).snapshots(),
     data,
     [],
   );
   const propsWithData = {
     ...props,
     data: currentData,
-  } as React.ComponentProps<C>;
+  };
 
   return <Component {...propsWithData} />;
 };

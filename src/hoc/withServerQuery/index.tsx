@@ -2,21 +2,19 @@ import { SnapshotEmitter } from '@squidcloud/common';
 import React from 'react';
 import WithQueryServer from './WithQueryServer';
 
-export interface WithQueryProps<T> {
-  data: Array<T>;
+export type AddQueryProps<Props, DataType> = Props & {
+  data: Array<DataType>;
 }
 
-export const withServerQuery = <C extends React.ComponentType<any>, T>(
-  Component: C,
-  query: SnapshotEmitter<T>,
+export function withServerQuery<Props, DataType>(
+  Component: React.ComponentType<AddQueryProps<Props, DataType>>,
+  query: SnapshotEmitter<DataType>,
   subscribe = false,
-) => {
-  const withQuery: React.FC<
-    Omit<React.ComponentProps<C>, keyof WithQueryProps<T>>
-  > = (props: Omit<React.ComponentProps<C>, keyof WithQueryProps<T>>) => {
+) {
+  const withQuery: React.FC<Props> = (props: Props) => {
     return (
       // @ts-expect-error Server Component
-      <WithQueryServer<C, T>
+      <WithQueryServer<Props, DataType>
         props={props}
         Component={Component}
         query={query}
@@ -26,4 +24,4 @@ export const withServerQuery = <C extends React.ComponentType<any>, T>(
   };
 
   return withQuery;
-};
+}
