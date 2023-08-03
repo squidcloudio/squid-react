@@ -1,5 +1,5 @@
 import { randomAge, randomName } from '@/data/names';
-import { useCollection, useQuery } from '@squidcloud/react';
+import { useCollection, useObservable } from '@squidcloud/react';
 
 export type Person = {
   name: string;
@@ -8,12 +8,16 @@ export type Person = {
 
 export type PropTypes = {
   title: string;
+  initialData: Array<Person>;
 };
 
-const Users = ({ title }: PropTypes) => {
+const Users = ({ title, initialData }: PropTypes) => {
   const collection = useCollection<Person>('people');
 
-  const { data } = useQuery(collection.query(), true);
+  const { data } = useObservable(
+    collection.query().dereference().snapshots(),
+    initialData,
+  );
 
   const insertFromClient = () => {
     collection.doc().insert({
