@@ -5,6 +5,7 @@
 /.pnp
 .pnp.js
 .yalc
+yalc.lock
 package-lock.json
 
 # testing
