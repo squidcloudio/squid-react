@@ -10,7 +10,7 @@
     "format": "prettier --write \"./**/src/**/*{ts,js,tsx,jsx,md,mdx}\"",
     "clean": "rimraf node_modules dist",
     "update": "ncu @squidcloud/client @squidcloud/common -u",
-    "publish:public": "npm run build && npm version patch --no-git-tag-version && npm publish --access public",
+    "publish:public": "npm run build && npm version patch --no-git-tag-version && npm publish --access public"
   },
   "files": [
     "dist/**/*"
