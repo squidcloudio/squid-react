@@ -22,7 +22,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "clean": "rimraf node_modules .yalc"
+    "clean": "rimraf node_modules .yalc",
+    "postinstall": "yalc add @squidcloud/react"
   },
   "eslintConfig": {
     "extends": [

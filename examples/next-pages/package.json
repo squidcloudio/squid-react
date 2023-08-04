@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "clean": "rimraf node_modules dist .next .yalc",
-    "clean:cache": "rimraf .next"
+    "clean:cache": "rimraf .next",
+    "postinstall": "yalc add @squidcloud/react"
   },
   "dependencies": {
     "@squidcloud/react": "file:.yalc/@squidcloud/react",
