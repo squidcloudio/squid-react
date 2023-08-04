@@ -7,7 +7,7 @@
     "build": "npm run clean:cache && next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rimraf node_modules dist .next",
+    "clean": "rimraf node_modules dist .next .yalc",
     "clean:cache": "rimraf .next"
   },
   "dependencies": {

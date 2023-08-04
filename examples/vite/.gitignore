@@ -12,7 +12,6 @@ dist
 dist-ssr
 *.local
 .yalc
-yalc.lock
 package-lock.json
 
 # Editor directories and files
