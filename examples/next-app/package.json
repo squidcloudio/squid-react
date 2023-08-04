@@ -7,7 +7,7 @@
     "build": "npm run clean:cache && next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rimraf node_modules dist .next",
+    "clean": "rimraf node_modules dist .next .yalc",
     "clean:cache": "rimraf .next"
   },
   "dependencies": {
@@ -22,5 +22,8 @@
     "react-dom": "18.2.0",
     "tailwindcss": "3.3.3",
     "typescript": "5.1.6"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.1"
   }
 }
