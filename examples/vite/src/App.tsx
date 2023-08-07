@@ -20,7 +20,10 @@ function App(): JSX.Element {
 
   const people = useCollection<Person>('people');
   const events = useCollection<Event>('events');
-  const { loading, data } = useQuery(events.query().eq('name', 'slider'), true);
+  const { loading, data } = useQuery(
+    events.query().eq('name', 'slider').dereference(),
+    true,
+  );
 
   function toggle(): void {
     setHide(!hide);
@@ -122,16 +125,16 @@ const Docs = <T,>(): JSX.Element => {
 };
 
 const Query = ({ query, description }: QueryProps): JSX.Element => {
-  const { loading, docs } = useQuery(query, true);
+  const { loading, data } = useQuery(query, true);
 
   function update(): void {
-    for (const doc of docs) {
+    for (const doc of data) {
       doc.update({ age: randomAge() }).then();
     }
   }
 
   function remove(): void {
-    for (const doc of docs) {
+    for (const doc of data) {
       doc.delete().then();
     }
   }
@@ -145,7 +148,7 @@ const Query = ({ query, description }: QueryProps): JSX.Element => {
         <span>Loading...</span>
       ) : (
         <ul>
-          {docs.map((d) => {
+          {data.map((d) => {
             return (
               <li key={d.refId}>
                 {d.data.name} {d.data.age}

@@ -99,8 +99,7 @@ When a query has been created, you use the `useQuery` hook to execute it, and op
 The hook returns an object that includes the following properties:
 
 - `loading`: Whether data has been returned by the query.
-- `docs`: The query results as an array of document references.
-- `data`: The query results as an array of data (same as calling `docs.map(d => d.data)`).
+- `data`: The query results as an array. This may be document references, document data, join query results, etc, depending on the type of query that is passed to the hook.
 - `error`: The error object, if an error occurs while executing the query.
 
 ```tsx
@@ -114,6 +113,7 @@ function App() {
   const { docs } = useQuery(
     collection.query().where('foo', '>', 'bar'),
     true /* subscribe */,
+    [], // initialValue
   );
 
   return (
@@ -126,9 +126,9 @@ function App() {
 }
 ```
 
-If `subscribe` is set to true, data will be streamed to the client and the component will automatically re-render when
-new updates are received. If `subscribe` is false, the initial data is fetched for the query, but no changes are
-streamed.
+If `subscribe` is set to true, data will be streamed to the client and the component will automatically re-render when new updates are received. If `subscribe` is false, the initial data is fetched for the query, but no changes are streamed.
+
+Optionally, the hook can also accept an `initialValue` that will be returned until the first result is loaded.
 
 #### usePagination
 
@@ -138,7 +138,6 @@ The hook returns an object that includes the following properties:
 
 - `loading`: Whether data is currently being loaded or paginated.
 - `data`: The paginated results as an array. This may be document references, document data, join query results, etc, depending on the type of query that is passed to the hook.
-
 - `hasNext`: A boolean indicating if there are more results available after the current page.
 - `hasPrev`: A boolean indicating if there are more results available before the current page.
 - `next`: A function to load the next page of results (only active when `hasNext` is true).
@@ -194,8 +193,7 @@ particular document.
 The hook returns an object that includes the following properties:
 
 - `loading`: Whether data has been returned by the document query.
-- `doc`: The document reference.
-- `data`: The document data (same as calling `doc.data`). This can be undefined if no data has been received or if the document has been deleted.
+- `data`: The document data. This can be undefined if no data has been received or if the document has been deleted.
 - `error`: The error object, if an error occurs while querying for the document.
 
 ```tsx
@@ -218,8 +216,7 @@ The same applies for `useDocs`, which can provide updates for multiple document 
 The hook returns an object that includes the following properties:
 
 - `loading`: Whether data has been returned by _all_ document queries.
-- `docs`: The array of document references.
-- `data`: An array of document data (same as calling `docs.map(d => d.data)`). An element in the array be undefined if no data has been received or if the document has been deleted.
+- `data`: An array of document data. An element in the array can be undefined if no data has been received or if the document has been deleted.
 - `error`: The error object, if an error occurs while querying for _any_ of the documents.
 
 ```tsx
@@ -254,8 +251,7 @@ you to use asynchronous functions on the `squid` instance directly in your React
 
 #### useObservable
 
-The `useObservable` hook allows you to subscribe to an `Observable<T>` and receive updates within your component. It
-returns an object that includes the following properties:
+The `useObservable` hook accepts a function that returns an `Observable<T>`, allowing you to subscribe to the observable and receive updates within your component. It returns an object that includes the following properties:
 
 - `loading`: Whether a value has been received from the observable.
 - `data`: The most recent data received from the observable.
@@ -268,7 +264,13 @@ function App() {
   const squid = useSquid();
 
   const { loading, data, error, complete } = useObservable(
-    squid.collection<User>('users').query().where('foo', '>', bar).snapshots(),
+    () => {
+      return squid
+        .collection<User>('users')
+        .query()
+        .where('foo', '>', bar)
+        .snapshots();
+    },
     [], // initialValue
     [bar], // deps
   );
@@ -282,17 +284,9 @@ when `bar` changes, we need to pass it as a dependency.
 
 Whenever the `deps` change, `loading` is reset to true until a value is emitted from the newly created observable.
 
-In addition to passing an observable directly to the `useObservable` hook, you can also pass a function that returns an observable.
-
-```typescript
-const { data } = useObservable(() => from(query.snapshot()));
-```
-
-This can be useful if you have an observable that begins emitting values before calling `subscribe`. Passing a function ensures that the observable will be only created when first calling the hook, or when there's a change in `deps`.
-
 #### usePromise
 
-The `usePromise` hook is similar to `useObservable` but it takes a _**function**_ that returns a `Promise<T>`. The
+The `usePromise` hook is similar to `useObservable`, except it accepts a function that returns a `Promise<T>`. The
 reason the hook takes a function instead of a promise directly is to ensure that the promise does not start executing
 until the component mounts.
 

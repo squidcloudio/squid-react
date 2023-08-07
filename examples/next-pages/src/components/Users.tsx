@@ -1,5 +1,5 @@
 import { randomAge, randomName } from '@/data/names';
-import { useCollection, useObservable } from '@squidcloud/react';
+import { useCollection, useQuery } from '@squidcloud/react';
 
 export type Person = {
   name: string;
@@ -14,8 +14,9 @@ export type PropTypes = {
 const Users = ({ title, initialData }: PropTypes) => {
   const collection = useCollection<Person>('people');
 
-  const { data } = useObservable(
-    collection.query().dereference().snapshots(),
+  const { data } = useQuery(
+    collection.query().dereference(),
+    true,
     initialData,
   );
 
@@ -27,7 +28,7 @@ const Users = ({ title, initialData }: PropTypes) => {
   };
 
   const insertFromApi = () => {
-    fetch('/api/insertUserFromApi', {
+    fetch('/api/insertUser', {
       method: 'POST',
     }).then();
   };
