@@ -7,7 +7,7 @@ const Pages = () => {
   const events = useCollection<Event>('events');
 
   const { loading: loadPageCount, data } = useQuery(
-    events.query().eq('name', 'pageSize'),
+    events.query().eq('name', 'pageSize').dereference(),
     true,
   );
 

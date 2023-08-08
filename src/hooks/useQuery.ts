@@ -1,22 +1,33 @@
 'use client';
 
-import { DocumentReference, QueryBuilder } from '@squidcloud/client';
-import { DocumentData } from '@squidcloud/common';
+import { DocumentData, SnapshotEmitter } from '@squidcloud/common';
 import { from } from 'rxjs';
 import { useObservable } from './useObservable';
 
-export type QueryType<T extends DocumentData> = {
+export type QueryType<T> = {
   loading: boolean;
-  docs: Array<DocumentReference<T>>;
   data: Array<T>;
   error: any;
 };
 
-export function useQuery<T extends DocumentData>(query: QueryBuilder<T>, subscribe = false): QueryType<T> {
-  const { loading, error, data } = useObservable<DocumentReference<T>[]>(
+type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
+
+export function useQuery<T extends DocumentData>(
+  query: T & SnapshotEmitter<any>,
+  subscribe = false,
+  initialValue?: Array<GetReturnType<T>>,
+): QueryType<GetReturnType<T>> {
+  const peekInitialValue = () => {
+    try {
+      return query.peek();
+    } catch {
+      return [];
+    }
+  };
+  const { loading, error, data } = useObservable<GetReturnType<T>[]>(
     () => (subscribe ? query.snapshots() : from(query.snapshot())),
-    [],
-    [query.hash, subscribe],
+    initialValue || peekInitialValue(),
+    [JSON.stringify(query.serialize()), subscribe],
   );
-  return { loading, error, docs: data, data: data.map((d) => d.data) };
+  return { loading, error, data };
 }

@@ -11,17 +11,17 @@ export type ObservableType<T> = {
 };
 
 export function useObservable<T>(
-  observable: Observable<T> | (() => Observable<T>),
+  observable: () => Observable<T>,
   initialValue: T,
   deps?: ReadonlyArray<unknown>,
 ): ObservableType<T>;
 export function useObservable<T>(
-  observable: Observable<T> | (() => Observable<T>),
+  observable: () => Observable<T>,
   initialValue?: T,
   deps?: ReadonlyArray<unknown>,
 ): ObservableType<T | null>;
 export function useObservable<T>(
-  observable: Observable<T> | (() => Observable<T>),
+  observable: () => Observable<T>,
   initialValue?: T,
   deps: ReadonlyArray<unknown> = [],
 ): ObservableType<T | null> {
@@ -32,10 +32,7 @@ export function useObservable<T>(
     complete: false,
   });
 
-  const observableMemo = useMemo(
-    () => (typeof observable === 'function' ? defer(() => observable()) : observable),
-    deps,
-  );
+  const observableMemo = useMemo(() => defer(observable), deps);
 
   useEffect(() => {
     // Set loading state to true when the observable changes

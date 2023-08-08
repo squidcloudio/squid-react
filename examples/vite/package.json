@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "clean": "rimraf node_modules dist .yalc",
+    "clean": "rimraf package-lock.json node_modules dist .yalc",
     "postinstall": "yalc add @squidcloud/react"
   },
   "dependencies": {

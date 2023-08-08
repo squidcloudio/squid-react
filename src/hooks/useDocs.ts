@@ -7,14 +7,13 @@ import { combineLatest } from 'rxjs';
 
 export type DocsType<T extends DocumentData> = {
   loading: boolean;
-  docs: Array<DocumentReference<T>>;
   data: Array<T | undefined>;
   error: any;
 };
 
 export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>>, subscribe = false): DocsType<T> {
   const [loading, setLoading] = useState<boolean>(!!docs.length);
-  const [data, setData] = useState<Array<T | undefined>>(docs.map((d) => (d.hasData ? d.data : undefined)));
+  const [data, setData] = useState<Array<T | undefined>>(docs.map((d) => d.peek()));
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
@@ -23,8 +22,8 @@ export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>
     const observables = docs.map((doc) => (subscribe ? doc.snapshots() : doc.snapshot()));
 
     const subscription = combineLatest(observables).subscribe({
-      next: (value: Array<DocumentReference<T> | undefined>) => {
-        setData(value.map((d) => (d?.hasData ? d.data : undefined)));
+      next: (value: Array<T | undefined>) => {
+        setData(value);
         setLoading(false);
       },
       error: (err) => {
@@ -38,5 +37,5 @@ export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>
     };
   }, [JSON.stringify(docs.map((d) => d.refId)), subscribe]);
 
-  return { loading, error, docs, data };
+  return { loading, error, data };
 }

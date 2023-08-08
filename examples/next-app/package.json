@@ -7,7 +7,7 @@
     "build": "npm run clean:cache && next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rimraf node_modules dist .next .yalc",
+    "clean": "rimraf package-lock.json node_modules dist .next .yalc",
     "clean:cache": "rimraf .next",
     "postinstall": "yalc add @squidcloud/react"
   },
