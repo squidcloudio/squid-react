@@ -1,6 +1,6 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "Squid React SDK",
   "types": "dist/index.d.ts",
   "module": "dist/index.js",
