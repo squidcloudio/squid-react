@@ -20,31 +20,44 @@ export function usePagination<T>(
   deps: ReadonlyArray<unknown> = [],
 ): PaginationType<GetReturnType<T>> {
   const pagination = useRef<Pagination<GetReturnType<T>> | null>(null);
-  const [paginationState, setPaginationState] = useState<PaginationState<GetReturnType<T>>>({
-    isLoading: true,
-    data: [],
-    hasNext: false,
-    hasPrev: false,
-  });
+  const [paginationState, setPaginationState] =
+    useState<PaginationType<GetReturnType<T>>>({
+      loading: true,
+      data: [],
+      hasNext: false,
+      hasPrev: false,
+      next: () => { return; },
+      prev: () => { return; },
+    });
 
-  useEffect(() => {
+  function setLoading() {
     setPaginationState((prevState) => ({
       ...prevState,
-      isLoading: true,
+      loading: true,
       hasNext: false,
       hasPrev: false,
     }));
+  }
+
+  useEffect(() => {
+    setLoading();
 
     pagination.current = query.paginate(options);
-    let subscription = pagination.current.observeState().subscribe((state) => {
-      if (!state.isLoading) {
-        setPaginationState(state);
-      } else {
-        setPaginationState((prevState) => ({
-          ...state,
-          data: prevState.data,
-        }));
-      }
+    const subscription = pagination.current.observeState().subscribe((state) => {
+      setPaginationState({
+        loading: false,
+        data: state.data,
+        hasNext: state.hasNext,
+        hasPrev: state.hasPrev,
+        next: () => {
+          setLoading();
+          pagination.current?.next()
+        },
+        prev: () => {
+          setLoading();
+          pagination.current?.prev()
+        },
+      });
     });
 
     return () => {
@@ -56,14 +69,5 @@ export function usePagination<T>(
     };
   }, [JSON.stringify(deps), JSON.stringify(options)]);
 
-  const { isLoading, data, hasNext, hasPrev } = paginationState;
-
-  return {
-    loading: isLoading,
-    data,
-    hasNext,
-    hasPrev,
-    next: () => !isLoading && pagination.current?.next(),
-    prev: () => !isLoading && pagination.current?.prev(),
-  };
+  return paginationState;
 }
