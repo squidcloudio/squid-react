@@ -30,13 +30,17 @@ export function usePagination<T>(
       prev: () => { return; },
     });
 
-  useEffect(() => {
+  function setLoading() {
     setPaginationState((prevState) => ({
       ...prevState,
       loading: true,
       hasNext: false,
       hasPrev: false,
     }));
+  }
+
+  useEffect(() => {
+    setLoading();
 
     pagination.current = query.paginate(options);
     const subscription = pagination.current.observeState().subscribe((state) => {
@@ -45,8 +49,14 @@ export function usePagination<T>(
         data: state.data,
         hasNext: state.hasNext,
         hasPrev: state.hasPrev,
-        next: () => pagination.current?.next(),
-        prev: () => pagination.current?.prev(),
+        next: () => {
+          setLoading();
+          pagination.current?.next()
+        },
+        prev: () => {
+          setLoading();
+          pagination.current?.prev()
+        },
       });
     });
 
