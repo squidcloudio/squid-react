@@ -20,31 +20,14 @@ export function usePagination<T>(
   deps: ReadonlyArray<unknown> = [],
 ): PaginationType<GetReturnType<T>> {
   const pagination = useRef<Pagination<GetReturnType<T>> | null>(null);
-  const [paginationState, setPaginationState] = useState<PaginationState<GetReturnType<T>>>({
-    isLoading: true,
-    data: [],
-    hasNext: false,
-    hasPrev: false,
-  });
+  const [paginationState, setPaginationState] = useState<PaginationState<GetReturnType<T>> | null>(null);
 
   useEffect(() => {
-    setPaginationState((prevState) => ({
-      ...prevState,
-      isLoading: true,
-      hasNext: false,
-      hasPrev: false,
-    }));
+    setPaginationState(null);
 
     pagination.current = query.paginate(options);
-    let subscription = pagination.current.observeState().subscribe((state) => {
-      if (!state.isLoading) {
-        setPaginationState(state);
-      } else {
-        setPaginationState((prevState) => ({
-          ...state,
-          data: prevState.data,
-        }));
-      }
+    const subscription = pagination.current.observeState().subscribe((state) => {
+      setPaginationState(state);
     });
 
     return () => {
@@ -56,14 +39,12 @@ export function usePagination<T>(
     };
   }, [JSON.stringify(deps), JSON.stringify(options)]);
 
-  const { isLoading, data, hasNext, hasPrev } = paginationState;
-
   return {
-    loading: isLoading,
-    data,
-    hasNext,
-    hasPrev,
-    next: () => !isLoading && pagination.current?.next(),
-    prev: () => !isLoading && pagination.current?.prev(),
+    loading: !paginationState,
+    data: paginationState?.data || [],
+    hasNext: paginationState?.hasNext || false,
+    hasPrev: paginationState?.hasPrev || false,
+    next: () => pagination.current?.next(),
+    prev: () => pagination.current?.prev(),
   };
 }
