@@ -132,7 +132,7 @@ Optionally, the hook can also accept an `initialValue` that will be returned unt
 
 #### usePagination
 
-The `usePagination` hook is used to paginate through query results. It provides an easy-to-use interface to handle pagination and keep the data up-to-date with changes. For more information on pagination in Squid, check out our [pagination documentation](https://docs.squid.cloud/docs/client-sdk/queries#pagination).
+The `usePagination` hook is used to paginate through query results. It provides an easy-to-use interface to handle pagination and keep the data up-to-date with changes. For more information on pagination in Squid, check out our [pagination documentation](https://docs.squid.cloud/docs/development-tools/client-sdk/queries#pagination).
 
 The hook returns an object that includes the following properties:
 
@@ -319,6 +319,6 @@ each time the `bar` variable changes.
 
 ## API reference
 
-Explore public APIs available in the [Squid Cloud documentation](https://squid.cloud/docs).
+Explore public APIs available in the [Squid Cloud documentation](https://docs.squid.cloud).
 
 ---
