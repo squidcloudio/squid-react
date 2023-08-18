@@ -33,7 +33,7 @@ function App(): JSX.Element {
     return <span>Loading...</span>;
   }
 
-  const age = data[0].value;
+  const age = data[0]?.value || 30;
 
   return (
     <div>
