@@ -1,8 +1,8 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "Squid React SDK",
-  "types": "dist/index.d.ts",
+  "types": "dist/cjs/index.d.ts",
   "main": "dist/cjs/index.js",
   "scripts": {
     "build": "rollup -c && yalc push",
