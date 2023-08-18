@@ -1,9 +1,9 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.21",
+  "version": "1.0.24",
   "description": "Squid React SDK",
   "types": "dist/index.d.ts",
-  "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
   "scripts": {
     "build": "rollup -c && yalc push",
     "lint": "eslint ./src",
@@ -53,7 +53,7 @@
     "yalc": "^1.0.0-pre.53"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.106",
-    "@squidcloud/common": "^1.0.91"
+    "@squidcloud/client": "^1.0.107",
+    "@squidcloud/common": "^1.0.92"
   }
 }

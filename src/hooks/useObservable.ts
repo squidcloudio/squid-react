@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Observable, defer } from 'rxjs';
+import { Observable } from 'rxjs';
 
 export type ObservableType<T> = {
   loading: boolean;
@@ -32,7 +32,7 @@ export function useObservable<T>(
     complete: false,
   });
 
-  const observableMemo = useMemo(() => defer(observable), deps);
+  const observableMemo = useMemo(observable, deps);
 
   useEffect(() => {
     // Set loading state to true when the observable changes

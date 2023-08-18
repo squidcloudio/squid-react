@@ -37,12 +37,12 @@ export default [
         format: 'cjs',
         sourcemap: true,
       },
-      {
-        preserveModules: true,
-        dir: 'dist',
-        format: 'esm',
-        sourcemap: true,
-      },
+      // {
+      //   preserveModules: true,
+      //   dir: 'dist',
+      //   format: 'esm',
+      //   sourcemap: true,
+      // },
     ],
     plugins,
     onwarn(warning, warn) {
