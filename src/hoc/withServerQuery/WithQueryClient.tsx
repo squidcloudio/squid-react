@@ -13,6 +13,17 @@ type PropTypes<C extends React.ComponentType<any>, T> = {
   data: Array<T>;
 };
 
+/**
+ * Component to wrap another component with a client query.
+ *
+ * @template C - The type of the React component.
+ * @template T - The type of the data in the query.
+ * @param Component - The component to wrap.
+ * @param props - The props of the Component.
+ * @param serializedQuery - The serialized query object.
+ * @param data - The initial data.
+ * @returns The Component wrapped with the current query data.
+ */
 const WithQueryClient = <C extends React.ComponentType<any>, T>({
   Component,
   props,

@@ -1,7 +1,7 @@
 'use client';
 
-import { Pagination, PaginationOptions, PaginationState, SnapshotEmitter } from '@squidcloud/common';
-import { useEffect, useRef, useState } from 'react';
+import {Pagination, PaginationOptions, SnapshotEmitter} from '@squidcloud/common';
+import {useEffect, useRef, useState} from 'react';
 
 export type PaginationType<T> = {
   loading: boolean;
@@ -14,6 +14,14 @@ export type PaginationType<T> = {
 
 type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
 
+/**
+ * Hook to get pagination data, loading state, and navigation functions.
+ *
+ * @param query The Squid query.
+ * @param options The pagination options.
+ * @param deps Array of dependencies for the hook. Default is [].
+ * @returns The pagination data, loading state, and navigation functions.
+ */
 export function usePagination<T>(
   query: T & SnapshotEmitter<any>,
   options: PaginationOptions,

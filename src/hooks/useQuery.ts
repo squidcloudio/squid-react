@@ -12,6 +12,15 @@ export type QueryType<T> = {
 
 type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
 
+/**
+ * Hook to get a Squid query data, loading state, and error.
+ *
+ * @template T
+ * @param query The query object.
+ * @param subscribe If true, subscribe to query snapshots. Default is false.
+ * @param initialValue The initial value of the data.
+ * @returns The query data, loading state, and error.
+ */
 export function useQuery<T extends DocumentData>(
   query: T & SnapshotEmitter<any>,
   subscribe = false,

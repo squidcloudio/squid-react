@@ -8,6 +8,14 @@ export type PromiseType<T = any> = {
   error: any;
 };
 
+/**
+ * Hook to get promise data, loading state, and error. Usually used with Squid queries' .snapshot() function.
+ *
+ * @param promiseFn The promise function.
+ * @param initialValue The initial value of the data.
+ * @param deps Array of dependencies for the hook. Default is [].
+ * @returns The promise data, loading state, and error.
+ */
 export function usePromise<T>(
   promiseFn: () => Promise<T>,
   initialValue: T,

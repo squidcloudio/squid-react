@@ -11,6 +11,14 @@ export type DocsType<T extends DocumentData> = {
   error: any;
 };
 
+/**
+ * Hook to get multiple Squid documents data, loading state, and errors.
+ *
+ * @template T extends DocumentData
+ * @param docs Array of Squid document references.
+ * @param subscribe Whether to subscribe to documents updates. Default is false.
+ * @returns The documents data, loading state, and errors.
+ */
 export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>>, subscribe = false): DocsType<T> {
   const [loading, setLoading] = useState<boolean>(!!docs.length);
   const [data, setData] = useState<Array<T | undefined>>(docs.map((d) => d.peek()));

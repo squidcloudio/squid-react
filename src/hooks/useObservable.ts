@@ -10,6 +10,14 @@ export type ObservableType<T> = {
   complete: boolean;
 };
 
+/**
+ * Hook to get Squid RXJS observable data, loading state, errors, and completion state.
+ *
+ * @param observable Function returning the observable (for instance, Squid query's snapshots()).
+ * @param initialValue Initial value of the data.
+ * @param deps Array of dependencies for the hook. Default is [].
+ * @returns The observable data, loading state, errors, and completion state.
+ */
 export function useObservable<T>(
   observable: () => Observable<T>,
   initialValue: T,

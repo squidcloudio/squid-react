@@ -5,6 +5,14 @@ import { DocumentData } from '@squidcloud/common';
 import { from } from 'rxjs';
 import { useObservable } from './useObservable';
 
+/**
+ * Hook to get a Squid document data, loading state, and errors.
+ *
+ * @template T extends DocumentData
+ * @param doc Squid document reference.
+ * @param subscribe Whether to subscribe to document updates. Default is false.
+ * @returns The document data, loading state, and errors.
+ */
 export type DocType<T extends DocumentData> = {
   loading: boolean;
   data: T | undefined;
