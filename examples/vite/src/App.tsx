@@ -1,6 +1,7 @@
 import { DocumentReference, QueryBuilder } from '@squidcloud/client';
 import { useCollection, useDocs, useQuery } from '@squidcloud/react';
 import { useState } from 'react';
+import Chat from './components/Chat';
 import Pages from './components/Pages';
 import Slider from './components/Slider';
 import { randomAge, randomName } from './data/names';
@@ -59,6 +60,7 @@ function App(): JSX.Element {
             />
           </div>
           <Pages />
+          <Chat />
         </div>
       )}
       <button style={{ marginTop: '32px' }} onClick={toggle}>
