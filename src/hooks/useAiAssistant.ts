@@ -43,8 +43,8 @@ export function useAiAssistant(integrationId: IntegrationId, profileId: string) 
   }, [data, complete]);
 
   const chat = (prompt: string) => {
-    setQuestion(prompt);
     setHistory((messages) => messages.concat({ id: generateId(), type: 'user', message: prompt }));
+    setQuestion(prompt);
   };
 
   return { chat, history, data, loading, error, complete };
