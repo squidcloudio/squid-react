@@ -47,6 +47,7 @@ export function useObservable<T>(
     if (!state.loading) {
       setState((prevState) => ({
         ...prevState,
+        data: initialValue !== undefined ? initialValue : null,
         loading: true,
         complete: false,
       }));
