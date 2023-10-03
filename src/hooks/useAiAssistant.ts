@@ -29,7 +29,7 @@ export function useAiAssistant(integrationId: IntegrationId, profileId: string) 
   useEffect(() => {
     const recentChat = history[history.length - 1];
 
-    if (!recentChat || !data) return;
+    if (!recentChat || !data || loading) return;
 
     if (recentChat.type === 'user') {
       setHistory((prevMessages) => prevMessages.concat({ id: generateId(), type: 'ai', message: data }));
@@ -40,7 +40,7 @@ export function useAiAssistant(integrationId: IntegrationId, profileId: string) 
         return newMessages;
       });
     }
-  }, [data, complete]);
+  }, [data, complete, loading]);
 
   const chat = (prompt: string) => {
     setHistory((messages) => messages.concat({ id: generateId(), type: 'user', message: prompt }));

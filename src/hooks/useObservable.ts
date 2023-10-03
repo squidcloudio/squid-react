@@ -45,9 +45,11 @@ export function useObservable<T>(
   useEffect(() => {
     // Set loading state to true when the observable changes
     if (!state.loading) {
+      // We don't reset the data here to ensure that the user still has access to the data
+      // from the previously emitted value while the new value is loading. This is important
+      // to prevent UI flashes of data, etc.
       setState((prevState) => ({
         ...prevState,
-        data: initialValue !== undefined ? initialValue : null,
         loading: true,
         complete: false,
       }));
