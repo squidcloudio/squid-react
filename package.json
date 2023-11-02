@@ -3,7 +3,7 @@
   "version": "1.0.35",
   "description": "Squid React SDK",
   "types": "dist/cjs/index.d.ts",
-  "main": "dist/cjs/index.js",
+  "main": "dist/cjs/src/index.js",
   "scripts": {
     "build": "rollup -c && yalc push",
     "lint": "eslint ./src",
