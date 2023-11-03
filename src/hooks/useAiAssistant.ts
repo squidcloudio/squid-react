@@ -55,7 +55,7 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
     const recentChat = history[history.length - 1];
 
     if (!recentChat || !data || loading) return;
-
+    if (complete) setQuestion('');
     if (recentChat.type === 'user') {
       setHistory((prevMessages) => prevMessages.concat({id: generateId(), type: 'ai', message: data}));
     } else {
@@ -64,6 +64,7 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
         newMessages[newMessages.length - 1].message = data;
         return newMessages;
       });
+
     }
   }, [data, complete, loading]);
 
