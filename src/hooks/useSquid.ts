@@ -1,8 +1,8 @@
 'use client';
 
-import {Squid} from '@squidcloud/client';
+import { Squid } from '@squidcloud/client';
 import React from 'react';
-import {SquidContext} from '../context';
+import { SquidContext } from '../context';
 
 /**
  * React Hook to get the Squid instance from the SquidContext.

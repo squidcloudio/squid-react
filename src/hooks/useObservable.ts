@@ -3,20 +3,31 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 
+/**
+ * Type representing the state and data of an observable request.
+ *
+ * @template T - The type of data the observable emits.
+ */
 export type ObservableType<T> = {
+  /** Indicates whether the observable request is in progress. */
   loading: boolean;
+  /** The latest data emitted by the observable. */
   data: T;
+  /** Any error that may have occurred during the observable request. */
   error: any;
+  /** Indicates whether the observable has completed its stream. */
   complete: boolean;
 };
 
 /**
- * Hook to get Squid RXJS observable data, loading state, errors, and completion state.
+ * Hook that subscribes to an RXJS Observable and keeps track of its loading state, data, errors, and completion state.
+ * This hook handles the subscription and unsubscription to the observable provided.
  *
- * @param observable Function returning the observable (for instance, Squid query's snapshots()).
- * @param initialValue Initial value of the data.
- * @param deps Array of dependencies for the hook. Default is [].
- * @returns The observable data, loading state, errors, and completion state.
+ * @template T - The type of data the observable emits.
+ * @param observable - A function that returns the observable to subscribe to.
+ * @param initialValue - The initial value to be used for the data before the observable emits.
+ * @param deps - Optional array of dependencies that, when changed, will re-subscribe to the provided observable function.
+ * @returns An object containing the observable's current loading state, the latest data emitted, any errors encountered, and completion state.
  */
 export function useObservable<T>(
   observable: () => Observable<T>,
