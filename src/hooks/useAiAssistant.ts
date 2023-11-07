@@ -67,7 +67,11 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
     () => {
       if (!question) return of('');
       if (aiQuery) {
-        return from(squid.ai().executeAiQuery(integrationId, question)).pipe(map((response) => response.answer));
+        return from(squid.ai().executeAiQuery(integrationId, question)).pipe(
+          map((response) => {
+            return response.answer + (response.explanation ? `\n\n${response.explanation}` : '');
+          }),
+        );
       } else {
         assertTruthy(profileId, 'profileId must be defined');
         return squid.ai().assistant(integrationId).profile(profileId).chat(question, aiAssistantOptions);
