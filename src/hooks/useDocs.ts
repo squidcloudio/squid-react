@@ -5,9 +5,17 @@ import { DocumentData } from '@squidcloud/common';
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
 
+/**
+ * Represents the state and collection of document data returned from a query within the Squid framework.
+ *
+ * @template T - The type extending `DocumentData` which defines the expected shape of each document's data in the array.
+ */
 export type DocsType<T extends DocumentData> = {
+  /** Indicates whether the document data collection request is in progress. */
   loading: boolean;
+  /** An array of document data, where each item is either the document's data or `undefined` if the data is not yet fetched or if no data exists for that item. */
   data: Array<T | undefined>;
+  /** Any error that may have occurred during the document data collection request. */
   error: any;
 };
 
