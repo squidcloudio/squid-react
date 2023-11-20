@@ -3,7 +3,7 @@
   "version": "1.0.39",
   "description": "Squid React SDK",
   "types": "dist/cjs/index.d.ts",
-  "main": "dist/cjs/src/index.js",
+  "main": "dist/cjs/index.js",
   "scripts": {
     "build": "rollup -c && yalc push",
     "lint": "eslint ./src",
@@ -38,6 +38,7 @@
     "eslint-config-next": "13.4.12",
     "eslint-plugin-react": "^7.33.1",
     "eslint-plugin-unused-imports": "^2.0.0",
+    "magic-string": "^0.30.5",
     "npm-check-updates": "^16.10.8",
     "prettier": "^2.8.4",
     "prettier-plugin-organize-imports": "^3.2.3",

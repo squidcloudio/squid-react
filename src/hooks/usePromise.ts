@@ -16,6 +16,14 @@ export type PromiseType<T = any> = {
   error: any;
 };
 
+export type PromiseOptions = {
+  /**
+   * Determines whether to execute the promise automatically. Defaults to `true`. When set to `false`, executing the
+   * promise will be delayed until `enabled` is set to `true`.
+   */
+  enabled?: boolean;
+};
+
 /**
  * Hook that provides state management for asynchronous operations, representing the loading state,
  * the resolved data, and any error that may occur. It is particularly useful for handling promises,
@@ -23,24 +31,22 @@ export type PromiseType<T = any> = {
  *
  * @template T - The expected type of the data to be resolved by the promise.
  * @param promiseFn - A function that returns a promise, which resolves to the data of type `T`.
+ * @param options - Options to control the behavior of the promise.
  * @param initialValue - The initial state for the data before the promise resolves.
  * @param deps - An array of dependencies that, when changed, will trigger the promise function to be called again.
  * @returns An object containing the current state of the asynchronous operation: the loading status, the resolved data, and any error.
  */
 export function usePromise<T>(
   promiseFn: () => Promise<T>,
+  options: PromiseOptions,
   initialValue: T,
   deps?: ReadonlyArray<unknown>,
 ): PromiseType<T>;
 export function usePromise<T>(
   promiseFn: () => Promise<T>,
+  options?: PromiseOptions,
   initialValue?: T,
   deps?: ReadonlyArray<unknown>,
-): PromiseType<T | null>;
-export function usePromise<T>(
-  promiseFn: () => Promise<T>,
-  initialValue?: T,
-  deps: ReadonlyArray<unknown> = [],
 ): PromiseType<T | null> {
   const [state, setState] = useState<PromiseType<T>>({
     loading: true,
@@ -48,10 +54,9 @@ export function usePromise<T>(
     error: null,
   });
 
-  const promiseFnMemo = useMemo(() => promiseFn, deps);
+  const promiseFnMemo = useMemo(() => promiseFn, [JSON.stringify(deps), JSON.stringify(options)]);
 
   useEffect(() => {
-    let isSubscribed = true;
     // Set loading state to true when the observable changes
     if (!state.loading) {
       setState((prevState) => ({
@@ -59,6 +64,11 @@ export function usePromise<T>(
         loading: true,
       }));
     }
+
+    const { enabled = true } = options || {};
+    if (!enabled) return;
+
+    let isSubscribed = true;
     promiseFnMemo()
       .then((value: T) => {
         if (isSubscribed) {

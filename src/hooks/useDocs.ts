@@ -4,6 +4,7 @@ import { DocumentReference } from '@squidcloud/client';
 import { DocumentData } from '@squidcloud/common';
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
+import { DocOptions } from './useDoc';
 
 /**
  * Represents the state and collection of document data returned from a query within the Squid framework.
@@ -24,16 +25,19 @@ export type DocsType<T extends DocumentData> = {
  *
  * @template T extends DocumentData
  * @param docs Array of Squid document references.
- * @param subscribe Whether to subscribe to documents updates. Default is false.
+ * @param options Options to control the behavior of the of the document queries.
  * @returns The documents data, loading state, and errors.
  */
-export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>>, subscribe = false): DocsType<T> {
+export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>>, options?: DocOptions): DocsType<T> {
   const [loading, setLoading] = useState<boolean>(!!docs.length);
   const [data, setData] = useState<Array<T | undefined>>(docs.map((d) => d.peek()));
   const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     setLoading(!!docs.length);
+
+    const { enabled = true, subscribe } = options || {};
+    if (!enabled) return;
 
     const observables = docs.map((doc) => (subscribe ? doc.snapshots() : doc.snapshot()));
 
@@ -51,7 +55,7 @@ export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>
     return () => {
       setTimeout(() => subscription.unsubscribe(), 0);
     };
-  }, [JSON.stringify(docs.map((d) => d.refId)), subscribe]);
+  }, [JSON.stringify(docs.map((d) => d.refId)), JSON.stringify(options)]);
 
   return { loading, error, data };
 }

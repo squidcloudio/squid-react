@@ -19,30 +19,36 @@ export type ObservableType<T> = {
   complete: boolean;
 };
 
+export type ObservableOptions = {
+  /**
+   * Determines whether to execute the observable automatically. Defaults to `true`. When set to `false`, executing the
+   * observable will be delayed until `enabled` is set to `true`.
+   */
+  enabled?: boolean;
+};
+
 /**
  * Hook that subscribes to an RXJS Observable and keeps track of its loading state, data, errors, and completion state.
  * This hook handles the subscription and unsubscription to the observable provided.
  *
  * @template T - The type of data the observable emits.
  * @param observable - A function that returns the observable to subscribe to.
+ * @param options Options to control the behavior of the observable.
  * @param initialValue - The initial value to be used for the data before the observable emits.
  * @param deps - Optional array of dependencies that, when changed, will re-subscribe to the provided observable function.
  * @returns An object containing the observable's current loading state, the latest data emitted, any errors encountered, and completion state.
  */
 export function useObservable<T>(
   observable: () => Observable<T>,
+  options: ObservableOptions,
   initialValue: T,
   deps?: ReadonlyArray<unknown>,
 ): ObservableType<T>;
 export function useObservable<T>(
   observable: () => Observable<T>,
+  options?: ObservableOptions,
   initialValue?: T,
   deps?: ReadonlyArray<unknown>,
-): ObservableType<T | null>;
-export function useObservable<T>(
-  observable: () => Observable<T>,
-  initialValue?: T,
-  deps: ReadonlyArray<unknown> = [],
 ): ObservableType<T | null> {
   const [state, setState] = useState<ObservableType<T | null>>({
     loading: true,
@@ -51,7 +57,7 @@ export function useObservable<T>(
     complete: false,
   });
 
-  const observableMemo = useMemo(observable, deps);
+  const observableMemo = useMemo(observable, [JSON.stringify(deps), JSON.stringify(options)]);
 
   useEffect(() => {
     // Set loading state to true when the observable changes
@@ -65,6 +71,10 @@ export function useObservable<T>(
         complete: false,
       }));
     }
+
+    const { enabled = true } = options || {};
+    if (!enabled) return;
+
     const subscription = observableMemo.subscribe({
       next: (value: T) =>
         setState({

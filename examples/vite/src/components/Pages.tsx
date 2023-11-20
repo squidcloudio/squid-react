@@ -2,13 +2,13 @@ import { useCollection, usePagination, useQuery } from '@squidcloud/react';
 import { Event, Person } from '../App';
 import Slider from './Slider';
 
-const Pages = () => {
+const Pages = ({ enabled }: { enabled: boolean }) => {
   const people = useCollection<Person>('people');
   const events = useCollection<Event>('events');
 
   const { loading: loadPageCount, data } = useQuery(
     events.query().eq('name', 'pageSize').dereference(),
-    true,
+    { subscribe: true },
   );
 
   const {
@@ -20,6 +20,7 @@ const Pages = () => {
   } = usePagination(people.query().sortBy('age'), {
     subscribe: true,
     pageSize: data[0]?.value || 5,
+    enabled,
   });
 
   if (loadPageCount || !docs.length) {

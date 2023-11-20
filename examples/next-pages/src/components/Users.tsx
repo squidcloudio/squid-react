@@ -16,7 +16,7 @@ const Users = ({ title, initialData }: PropTypes) => {
 
   const { data } = useQuery(
     collection.query().dereference(),
-    true,
+    { subscribe: true },
     initialData,
   );
 

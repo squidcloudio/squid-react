@@ -34,7 +34,7 @@ const WithQueryClient = <C extends React.ComponentType<any>, T>({
 
   const { data: currentData } = useQuery(
     deserializeQuery<T>(squid, serializedQuery),
-    true,
+    { subscribe: true },
     data,
   );
   const propsWithData = {

@@ -20,6 +20,16 @@ export type QueryType<T> = {
 
 type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
 
+export type QueryOptions = {
+  /**
+   * Determines whether the query runs automatically. Defaults to `true`. When set to `false`, executing the query will
+   * be delayed until `enabled` is set to `true`.
+   */
+  enabled?: boolean;
+  /** Determines whether to continuously subscribe to query updates. If `false`, a single snapshot will be fetched. */
+  subscribe?: boolean;
+};
+
 /**
  * Hook that provides state management for Squid queries, giving access to the data items,
  * the loading status, and any errors encountered during the query execution. It can subscribe to
@@ -27,14 +37,14 @@ type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
  *
  * @template T - The expected type of the individual data items returned by the query.
  * @param query - The Squid query.
- * @param subscribe - Determines whether to continuously subscribe to query updates. If `false`, a single snapshot will be fetched.
+ * @param options - Options to control the behavior of the query.
  * @param initialValue - An optional array of initial data items to be used before the query resolves for the first time.
  * @param deps - An array of dependencies that, when changed, will cause the hook to resubscribe to the query updates.
  * @returns An object containing the current state of the query operation: the loading status, the array of data items, and any error.
  */
 export function useQuery<T extends DocumentData>(
   query: T & SnapshotEmitter<any>,
-  subscribe = false,
+  options?: QueryOptions,
   initialValue?: Array<GetReturnType<T>>,
   deps: ReadonlyArray<unknown> = [],
 ): QueryType<GetReturnType<T>> {
@@ -45,8 +55,12 @@ export function useQuery<T extends DocumentData>(
       return [];
     }
   };
+
+  const { enabled, subscribe } = options || {};
+
   const { loading, error, data } = useObservable<GetReturnType<T>[]>(
     () => (subscribe ? query.snapshots() : from(query.snapshot())),
+    { enabled },
     initialValue || peekInitialValue(),
     [JSON.stringify(query.serialize()), subscribe, JSON.stringify(deps)],
   );

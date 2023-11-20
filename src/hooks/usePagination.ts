@@ -1,6 +1,6 @@
 'use client';
 
-import { Pagination, PaginationOptions, SnapshotEmitter } from '@squidcloud/common';
+import { Pagination, SnapshotEmitter, PaginationOptions as SquidPaginationOptions } from '@squidcloud/common';
 import { useEffect, useRef, useState } from 'react';
 
 /**
@@ -24,6 +24,14 @@ export type PaginationType<T> = {
 };
 
 type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
+
+export interface PaginationOptions extends SquidPaginationOptions {
+  /**
+   * Determines whether to execute the pagination query automatically. Defaults to `true`. When set to `false`,
+   * executing the query will be delayed until `enabled` is set to `true`.
+   */
+  enabled?: boolean;
+}
 
 /**
  * Hook that provides a simple interface for paginating data from a Squid query.
@@ -67,6 +75,9 @@ export function usePagination<T>(
 
   useEffect(() => {
     setLoading();
+
+    const { enabled = true } = options;
+    if (!enabled) return;
 
     pagination.current = query.paginate(options);
     const subscription = pagination.current.observeState().subscribe((state) => {
