@@ -10,8 +10,8 @@
     "format": "prettier --write \"./**/src/**/*{ts,js,tsx,jsx,md,mdx}\"",
     "clean": "rimraf node_modules dist",
     "update": "ncu @squidcloud/client @squidcloud/common -u",
-    "publish:public": "npm run build && bash ./publish.sh",
-    "publish:beta": "npm run build && bash ./publish.sh beta"
+    "publish:public": "npm run update && npm run lint && npm run build && bash ./publish.sh",
+    "publish:beta": "npm run update && npm run lint && npm run build && bash ./publish.sh beta"
   },
   "files": [
     "dist/**/*"
@@ -25,6 +25,11 @@
     "react": "^16.11.0 || ^17 || ^18",
     "react-dom": "^16.11.0 || ^17 || ^18",
     "rxjs": ">=7.5.7 <8.0.0"
+  },
+  "dependencies": {
+    "@squidcloud/client": "^1.0.144",
+    "@squidcloud/common": "^1.0.144",
+    "assertic": "^1.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.1",
@@ -52,10 +57,5 @@
     "rollup-plugin-preserve-directives": "^0.2.0",
     "rollup-plugin-typescript2": "^0.34.1",
     "yalc": "^1.0.0-pre.53"
-  },
-  "dependencies": {
-    "@squidcloud/client": "^1.0.144",
-    "@squidcloud/common": "^1.0.144",
-    "assertic": "^1.0.0"
   }
 }

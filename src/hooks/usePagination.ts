@@ -93,6 +93,7 @@ export function usePagination<T>(
         subscription.unsubscribe();
       }, 0);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(deps), JSON.stringify(options)]);
 
   return paginationState;

@@ -48,6 +48,7 @@ export function usePromise<T>(
     error: null,
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const promiseFnMemo = useMemo(() => promiseFn, deps);
 
   useEffect(() => {
@@ -83,7 +84,7 @@ export function usePromise<T>(
     return () => {
       isSubscribed = false;
     };
-  }, [promiseFnMemo]);
+  }, [promiseFnMemo, state.loading]);
 
   return state;
 }
