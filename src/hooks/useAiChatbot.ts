@@ -95,7 +95,7 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
         return newMessages;
       });
     }
-  }, [data, complete, loading]);
+  }, [data, complete, loading, history]);
 
   const chat = (prompt: string, options?: AiChatbotChatOptions) => {
     setHistory((messages) => messages.concat({ id: generateId(), type: 'user', message: prompt }));

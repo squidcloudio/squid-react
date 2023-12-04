@@ -51,6 +51,7 @@ export function useObservable<T>(
     complete: false,
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const observableMemo = useMemo(observable, deps);
 
   useEffect(() => {
@@ -92,7 +93,7 @@ export function useObservable<T>(
       // subscription.
       setTimeout(() => subscription.unsubscribe(), 0);
     };
-  }, [observableMemo]);
+  }, [observableMemo, state.loading]);
 
   return state;
 }

@@ -51,6 +51,7 @@ export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>
     return () => {
       setTimeout(() => subscription.unsubscribe(), 0);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(docs.map((d) => d.refId)), subscribe]);
 
   return { loading, error, data };
