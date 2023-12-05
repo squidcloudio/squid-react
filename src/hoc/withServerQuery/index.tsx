@@ -6,6 +6,17 @@ export interface WithQueryProps<T> {
   data: Array<T>;
 }
 
+export type WithQueryOptions = {
+  /**
+   * If true, the Component will subscribe to the query snapshots. Defaults to `true`.
+   */
+  subscribe?: boolean;
+};
+
+export const DefaultWithQueryOptions: Required<WithQueryOptions> = {
+  subscribe: true,
+};
+
 /**
  * Higher Order Component (HOC) to wrap a component with a server query.
  *
@@ -13,13 +24,13 @@ export interface WithQueryProps<T> {
  * @template T - The type of the data in the query.
  * @param Component - The component to wrap.
  * @param query - The query object.
- * @param subscribe - Whether to subscribe to query snapshots. Default is false.
+ * @param options - Options to control the behavior of the HOC.
  * @returns A new component that wraps the given component with the server query.
  */
 export const withServerQuery = <C extends React.ComponentType<any>, T>(
   Component: C,
   query: SnapshotEmitter<T>,
-  subscribe = false,
+  options?: WithQueryOptions,
 ) => {
   const withQuery: React.FC<
     Omit<React.ComponentProps<C>, keyof WithQueryProps<T>>
@@ -30,7 +41,7 @@ export const withServerQuery = <C extends React.ComponentType<any>, T>(
         props={props}
         Component={Component}
         query={query}
-        subscribe={subscribe}
+        options={options}
       />
     );
   };

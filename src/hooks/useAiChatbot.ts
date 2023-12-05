@@ -77,8 +77,7 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
         return squid.ai().chatbot(integrationId).profile(profileId).chat(question, aiChatbotOptions);
       }
     },
-    {},
-    '',
+    { initialData: '' },
     [question],
   );
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { DocumentData, SnapshotEmitter } from '@squidcloud/common';
-import { useMemo } from 'react';
 import { from } from 'rxjs';
 import { useObservable } from './useObservable';
 
@@ -38,7 +37,7 @@ export type QueryOptions<T> = {
    * An optional array of initial data items to be used before the query resolves for the first time. If a parent query
    * is active, this defaults to data currently available the client. Otherwise, the default is an empty array.
    */
-  initialData: Array<GetReturnType<T>>;
+  initialData?: Array<GetReturnType<T>>;
 };
 
 const DefaultQueryOptions: Required<QueryOptions<null>> = {
@@ -60,12 +59,10 @@ const DefaultQueryOptions: Required<QueryOptions<null>> = {
  */
 export function useQuery<T extends DocumentData>(
   query: T & SnapshotEmitter<any>,
-  options?: QueryOptions<T>,
+  options: QueryOptions<T> = {},
   deps: ReadonlyArray<unknown> = [],
 ): QueryType<GetReturnType<T>> {
-  const mergedOptions = useMemo(() => {
-    return { ...DefaultQueryOptions, ...options };
-  }, [JSON.stringify(options)]);
+  const mergedOptions = { ...DefaultQueryOptions, ...options };
 
   const peekInitialValue = () => {
     try {
@@ -75,11 +72,11 @@ export function useQuery<T extends DocumentData>(
     }
   };
 
-  const { enabled, subscribe } = mergedOptions;
+  const { enabled, subscribe, initialData } = mergedOptions;
 
   const { loading, error, data } = useObservable<GetReturnType<T>[]>(
     () => (subscribe ? query.snapshots() : from(query.snapshot())),
-    { enabled, initialData: options?.initialData || peekInitialValue() },
+    { enabled, initialData: initialData || peekInitialValue() },
     [JSON.stringify(query.serialize()), subscribe, JSON.stringify(deps)],
   );
   return { loading, error, data };

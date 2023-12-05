@@ -41,23 +41,26 @@ const DefaultObservableOption: Required<ObservableOptions<null>> = {
  *
  * @template T - The type of data the observable emits.
  * @param observable - A function that returns the observable to subscribe to.
- * @param options Options to control the behavior of the observable.
+ * @param options - Options to control the behavior of the observable.
  * @param deps - Optional array of dependencies that, when changed, will re-subscribe to the provided observable function.
  * @returns An object containing the observable's current loading state, the latest data emitted, any errors encountered, and completion state.
  */
 export function useObservable<T>(
   observable: () => Observable<T>,
-  options: ObservableOptions<T>,
+  options: ObservableOptions<T> & { initialData: T },
   deps?: ReadonlyArray<unknown>,
 ): ObservableType<T>;
 export function useObservable<T>(
   observable: () => Observable<T>,
   options?: ObservableOptions<T>,
+  deps?: ReadonlyArray<unknown>,
+): ObservableType<T | null>;
+export function useObservable<T>(
+  observable: () => Observable<T>,
+  options: ObservableOptions<T> = {},
   deps: ReadonlyArray<unknown> = [],
 ): ObservableType<T | null> {
-  const mergedOptions = useMemo(() => {
-    return { ...DefaultObservableOption, ...options };
-  }, [JSON.stringify(options)]);
+  const mergedOptions = { ...DefaultObservableOption, ...options };
 
   const [state, setState] = useState<ObservableType<T | null>>({
     loading: true,
@@ -66,7 +69,7 @@ export function useObservable<T>(
     complete: false,
   });
 
-  const observableMemo = useMemo(observable, [JSON.stringify(deps), JSON.stringify(mergedOptions)]);
+  const observableMemo = useMemo(observable, [JSON.stringify(deps), mergedOptions.enabled]);
 
   useEffect(() => {
     // Set loading state to true when the observable changes

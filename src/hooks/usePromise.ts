@@ -12,7 +12,7 @@ export type PromiseType<T = any> = {
   /** Indicates whether the promise is currently being resolved. */
   loading: boolean;
   /** The data resolved by the promise, if any. */
-  data: T | null;
+  data: T;
   /** Any error that may have been thrown during the promise resolution. */
   error: any;
 };
@@ -45,25 +45,28 @@ const DefaultPromiseOptions: Required<ObservableOptions<null>> = {
  */
 export function usePromise<T>(
   promiseFn: () => Promise<T>,
-  options: PromiseOptions<T>,
+  options: PromiseOptions<T> & { initialData: T },
   deps?: ReadonlyArray<unknown>,
 ): PromiseType<T>;
 export function usePromise<T>(
   promiseFn: () => Promise<T>,
   options?: PromiseOptions<T>,
+  deps?: ReadonlyArray<unknown>,
+): PromiseType<T | null>;
+export function usePromise<T>(
+  promiseFn: () => Promise<T>,
+  options: PromiseOptions<T> = {},
   deps: ReadonlyArray<unknown> = [],
 ): PromiseType<T | null> {
-  const mergedOptions = useMemo(() => {
-    return { ...DefaultPromiseOptions, ...options };
-  }, [JSON.stringify(options)]);
+  const mergedOptions = { ...DefaultPromiseOptions, ...options };
 
-  const [state, setState] = useState<PromiseType<T>>({
+  const [state, setState] = useState<PromiseType<T | null>>({
     loading: true,
     data: mergedOptions.initialData,
     error: null,
   });
 
-  const promiseFnMemo = useMemo(() => promiseFn, [JSON.stringify(deps), JSON.stringify(options)]);
+  const promiseFnMemo = useMemo(() => promiseFn, [JSON.stringify(deps), mergedOptions.enabled]);
 
   useEffect(() => {
     // Set loading state to true when the observable changes

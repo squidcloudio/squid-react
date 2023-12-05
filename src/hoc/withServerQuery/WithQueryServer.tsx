@@ -1,13 +1,17 @@
 import { SnapshotEmitter } from '@squidcloud/common';
 import React from 'react';
 import WithQueryClient from './WithQueryClient';
-import { WithQueryProps } from './index';
+import {
+  DefaultWithQueryOptions,
+  WithQueryOptions,
+  WithQueryProps,
+} from './index';
 
 type PropTypes<C extends React.ComponentType<any>, T> = {
   Component: C;
   props: Omit<React.ComponentProps<C>, keyof WithQueryProps<T>>;
   query: SnapshotEmitter<T>;
-  subscribe: boolean;
+  options?: WithQueryOptions;
 };
 
 /**
@@ -18,23 +22,25 @@ type PropTypes<C extends React.ComponentType<any>, T> = {
  * @param Component - The component to wrap.
  * @param props - The props of the Component.
  * @param query - The query object.
- * @param subscribe - If true, the Component will subscribe to the query snapshots.
+ * @param options - Options to control the behavior of the HOC.
  * @returns The Component wrapped with the query data, or a WithQueryClient component if subscribe is true.
  */
 const WithQueryServer = async <C extends React.ComponentType<any>, T>({
   Component,
   props,
   query,
-  subscribe,
+  options,
 }: PropTypes<C, T>) => {
   const data = await query.snapshot();
+
+  const mergedOptions = { ...DefaultWithQueryOptions, ...options };
 
   const propsWithData = {
     ...props,
     data,
   } as React.ComponentProps<C>;
 
-  if (!subscribe) {
+  if (!mergedOptions.subscribe) {
     return <Component {...propsWithData} />;
   }
 

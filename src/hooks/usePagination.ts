@@ -33,6 +33,10 @@ export interface PaginationOptions extends SquidPaginationOptions {
   enabled?: boolean;
 }
 
+const DefaultPaginationOptions: Required<Omit<PaginationOptions, keyof SquidPaginationOptions>> = {
+  enabled: true,
+};
+
 /**
  * Hook that provides a simple interface for paginating data from a Squid query.
  * It returns the current pagination state including the data for the current page,
@@ -50,6 +54,8 @@ export function usePagination<T>(
   options: PaginationOptions,
   deps: ReadonlyArray<unknown> = [],
 ): PaginationType<GetReturnType<T>> {
+  const mergedOptions = { ...DefaultPaginationOptions, ...options };
+
   const pagination = useRef<Pagination<GetReturnType<T>> | null>(null);
   const [paginationState, setPaginationState] = useState<PaginationType<GetReturnType<T>>>({
     loading: true,
@@ -76,10 +82,10 @@ export function usePagination<T>(
   useEffect(() => {
     setLoading();
 
-    const { enabled = true } = options;
+    const { enabled } = mergedOptions;
     if (!enabled) return;
 
-    pagination.current = query.paginate(options);
+    pagination.current = query.paginate(mergedOptions);
     const subscription = pagination.current.observeState().subscribe((state) => {
       setPaginationState({
         loading: false,
@@ -104,7 +110,7 @@ export function usePagination<T>(
         subscription.unsubscribe();
       }, 0);
     };
-  }, [JSON.stringify(deps), JSON.stringify(options)]);
+  }, [JSON.stringify(deps), JSON.stringify(mergedOptions)]);
 
   return paginationState;
 }

@@ -2,7 +2,6 @@
 
 import { DocumentReference } from '@squidcloud/client';
 import { DocumentData } from '@squidcloud/common';
-import { useMemo } from 'react';
 import { from } from 'rxjs';
 import { useObservable } from './useObservable';
 
@@ -44,10 +43,8 @@ export const DefaultDocOptions: Required<DocOptions> = {
  * @param options Options to control the behavior of the document query.
  * @returns The document data, loading state, and errors.
  */
-export function useDoc<T extends DocumentData>(doc: DocumentReference<T>, options?: DocOptions): DocType<T> {
-  const mergedOptions = useMemo(() => {
-    return { ...DefaultDocOptions, ...options };
-  }, [JSON.stringify(options)]);
+export function useDoc<T extends DocumentData>(doc: DocumentReference<T>, options: DocOptions = {}): DocType<T> {
+  const mergedOptions = { ...DefaultDocOptions, ...options };
 
   const { enabled, subscribe } = mergedOptions;
 

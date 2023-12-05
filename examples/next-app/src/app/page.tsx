@@ -13,7 +13,7 @@ export default function Home() {
   const UsersWithQuery = withServerQuery(
     Users,
     squid.collection<Person>('people').query().dereference(),
-    true,
+    { subscribe: true },
   );
   return <UsersWithQuery title="Users" />;
 }
