@@ -1,6 +1,6 @@
 'use client';
 
-import { AiAssistantChatOptions, generateId, IntegrationId } from '@squidcloud/common';
+import { AiChatbotChatOptions, generateId, IntegrationId } from '@squidcloud/common';
 import { assertTruthy } from 'assertic';
 import { useEffect, useState } from 'react';
 import { from, map, of } from 'rxjs';
@@ -24,7 +24,7 @@ export type ChatMessage = {
  */
 interface AiHookResponse {
   /** Function to send a new message to the chat. */
-  chat: (prompt: string, options?: AiAssistantChatOptions) => void;
+  chat: (prompt: string, options?: AiChatbotChatOptions) => void;
   /** Array containing the history of chat messages. */
   history: ChatMessage[];
   /** The latest AI response or data received. */
@@ -47,12 +47,12 @@ export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
 }
 
 /**
- * Custom hook for interacting with an AI assistant, scoped to a specific AI integration and profile within the integration.
+ * Custom hook for interacting with an AI chatbot, scoped to a specific AI integration and profile within the integration.
  * @param integrationId - The unique identifier for the AI integration.
  * @param profileId - The identifier for the profile within the AI integration.
  * @returns An object containing methods and state for AI chat interactions.
  */
-export function useAiAssistant(integrationId: IntegrationId, profileId: string): AiHookResponse {
+export function useAiChatbot(integrationId: IntegrationId, profileId: string): AiHookResponse {
   return useAiHook(integrationId, false, profileId);
 }
 
@@ -60,7 +60,7 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
   const squid = useSquid();
   assertTruthy(!aiQuery || squid.options.apiKey, 'apiKey must be defined for AI queries');
   const [question, setQuestion] = useState('');
-  const [aiAssistantOptions, setAiAssistantOptions] = useState<AiAssistantChatOptions | undefined>(undefined);
+  const [aiChatbotOptions, setAiChatbotOptions] = useState<AiChatbotChatOptions | undefined>(undefined);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
 
   const { data, error, loading, complete } = useObservable(
@@ -74,7 +74,7 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
         );
       } else {
         assertTruthy(profileId, 'profileId must be defined');
-        return squid.ai().assistant(integrationId).profile(profileId).chat(question, aiAssistantOptions);
+        return squid.ai().chatbot(integrationId).profile(profileId).chat(question, aiChatbotOptions);
       }
     },
     {},
@@ -98,9 +98,9 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
     }
   }, [data, complete, loading]);
 
-  const chat = (prompt: string, options?: AiAssistantChatOptions) => {
+  const chat = (prompt: string, options?: AiChatbotChatOptions) => {
     setHistory((messages) => messages.concat({ id: generateId(), type: 'user', message: prompt }));
-    setAiAssistantOptions(options);
+    setAiChatbotOptions(options);
     setQuestion(prompt);
   };
 
