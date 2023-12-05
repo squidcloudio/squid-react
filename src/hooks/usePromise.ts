@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { ObservableOptions } from './useObservable';
 
 /**
  * Type representing the state of an asynchronous operation provided by a promise.
@@ -16,12 +17,19 @@ export type PromiseType<T = any> = {
   error: any;
 };
 
-export type PromiseOptions = {
+export type PromiseOptions<T> = {
   /**
    * Determines whether to execute the promise automatically. Defaults to `true`. When set to `false`, executing the
    * promise will be delayed until `enabled` is set to `true`.
    */
   enabled?: boolean;
+  /** The initial state for the data before the promise resolves. Defaults to `null`. */
+  initialData?: T;
+};
+
+const DefaultPromiseOptions: Required<ObservableOptions<null>> = {
+  enabled: true,
+  initialData: null,
 };
 
 /**
@@ -32,25 +40,26 @@ export type PromiseOptions = {
  * @template T - The expected type of the data to be resolved by the promise.
  * @param promiseFn - A function that returns a promise, which resolves to the data of type `T`.
  * @param options - Options to control the behavior of the promise.
- * @param initialValue - The initial state for the data before the promise resolves.
  * @param deps - An array of dependencies that, when changed, will trigger the promise function to be called again.
  * @returns An object containing the current state of the asynchronous operation: the loading status, the resolved data, and any error.
  */
 export function usePromise<T>(
   promiseFn: () => Promise<T>,
-  options: PromiseOptions,
-  initialValue: T,
+  options: PromiseOptions<T>,
   deps?: ReadonlyArray<unknown>,
 ): PromiseType<T>;
 export function usePromise<T>(
   promiseFn: () => Promise<T>,
-  options?: PromiseOptions,
-  initialValue?: T,
-  deps?: ReadonlyArray<unknown>,
+  options?: PromiseOptions<T>,
+  deps: ReadonlyArray<unknown> = [],
 ): PromiseType<T | null> {
+  const mergedOptions = useMemo(() => {
+    return { ...DefaultPromiseOptions, ...options };
+  }, [JSON.stringify(options)]);
+
   const [state, setState] = useState<PromiseType<T>>({
     loading: true,
-    data: initialValue !== undefined ? initialValue : null,
+    data: mergedOptions.initialData,
     error: null,
   });
 
@@ -65,7 +74,7 @@ export function usePromise<T>(
       }));
     }
 
-    const { enabled = true } = options || {};
+    const { enabled } = mergedOptions;
     if (!enabled) return;
 
     let isSubscribed = true;

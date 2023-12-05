@@ -2,9 +2,9 @@
 
 import { DocumentReference } from '@squidcloud/client';
 import { DocumentData } from '@squidcloud/common';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { DocOptions } from './useDoc';
+import { DefaultDocOptions, DocOptions } from './useDoc';
 
 /**
  * Represents the state and collection of document data returned from a query within the Squid framework.
@@ -33,10 +33,14 @@ export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>
   const [data, setData] = useState<Array<T | undefined>>(docs.map((d) => d.peek()));
   const [error, setError] = useState<any>(null);
 
+  const mergedOptions = useMemo(() => {
+    return { ...DefaultDocOptions, ...options };
+  }, [JSON.stringify(options)]);
+
   useEffect(() => {
     setLoading(!!docs.length);
 
-    const { enabled = true, subscribe } = options || {};
+    const { enabled, subscribe } = mergedOptions;
     if (!enabled) return;
 
     const observables = docs.map((doc) => (subscribe ? doc.snapshots() : doc.snapshot()));
@@ -55,7 +59,7 @@ export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>
     return () => {
       setTimeout(() => subscription.unsubscribe(), 0);
     };
-  }, [JSON.stringify(docs.map((d) => d.refId)), JSON.stringify(options)]);
+  }, [JSON.stringify(docs.map((d) => d.refId)), JSON.stringify(mergedOptions)]);
 
   return { loading, error, data };
 }

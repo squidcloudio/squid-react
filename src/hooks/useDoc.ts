@@ -2,6 +2,7 @@
 
 import { DocumentReference } from '@squidcloud/client';
 import { DocumentData } from '@squidcloud/common';
+import { useMemo } from 'react';
 import { from } from 'rxjs';
 import { useObservable } from './useObservable';
 
@@ -25,8 +26,14 @@ export type DocOptions = {
    * query will be delayed until `enabled` is set to `true`.
    */
   enabled?: boolean;
-  /** Whether to subscribe to document updates. Default is false. */
+
+  /** Whether to subscribe to document updates. Defaults to `true`. */
   subscribe?: boolean;
+};
+
+export const DefaultDocOptions: Required<DocOptions> = {
+  enabled: true,
+  subscribe: true,
 };
 
 /**
@@ -38,12 +45,15 @@ export type DocOptions = {
  * @returns The document data, loading state, and errors.
  */
 export function useDoc<T extends DocumentData>(doc: DocumentReference<T>, options?: DocOptions): DocType<T> {
-  const { enabled, subscribe } = options || {};
+  const mergedOptions = useMemo(() => {
+    return { ...DefaultDocOptions, ...options };
+  }, [JSON.stringify(options)]);
+
+  const { enabled, subscribe } = mergedOptions;
 
   const { loading, error, data } = useObservable<T | undefined>(
     () => (subscribe ? doc.snapshots() : from(doc.snapshot())),
-    { enabled },
-    doc.peek(),
+    { enabled, initialData: doc.peek() },
     [doc.refId, subscribe],
   );
 

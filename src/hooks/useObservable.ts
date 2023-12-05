@@ -19,12 +19,20 @@ export type ObservableType<T> = {
   complete: boolean;
 };
 
-export type ObservableOptions = {
+export type ObservableOptions<T> = {
   /**
    * Determines whether to execute the observable automatically. Defaults to `true`. When set to `false`, executing the
    * observable will be delayed until `enabled` is set to `true`.
    */
   enabled?: boolean;
+
+  /** The initial data to be used for the data before the observable emits. Defaults to `null`. */
+  initialData?: T;
+};
+
+const DefaultObservableOption: Required<ObservableOptions<null>> = {
+  enabled: true,
+  initialData: null,
 };
 
 /**
@@ -34,30 +42,31 @@ export type ObservableOptions = {
  * @template T - The type of data the observable emits.
  * @param observable - A function that returns the observable to subscribe to.
  * @param options Options to control the behavior of the observable.
- * @param initialValue - The initial value to be used for the data before the observable emits.
  * @param deps - Optional array of dependencies that, when changed, will re-subscribe to the provided observable function.
  * @returns An object containing the observable's current loading state, the latest data emitted, any errors encountered, and completion state.
  */
 export function useObservable<T>(
   observable: () => Observable<T>,
-  options: ObservableOptions,
-  initialValue: T,
+  options: ObservableOptions<T>,
   deps?: ReadonlyArray<unknown>,
 ): ObservableType<T>;
 export function useObservable<T>(
   observable: () => Observable<T>,
-  options?: ObservableOptions,
-  initialValue?: T,
-  deps?: ReadonlyArray<unknown>,
+  options?: ObservableOptions<T>,
+  deps: ReadonlyArray<unknown> = [],
 ): ObservableType<T | null> {
+  const mergedOptions = useMemo(() => {
+    return { ...DefaultObservableOption, ...options };
+  }, [JSON.stringify(options)]);
+
   const [state, setState] = useState<ObservableType<T | null>>({
     loading: true,
-    data: initialValue !== undefined ? initialValue : null,
+    data: mergedOptions.initialData,
     error: null,
     complete: false,
   });
 
-  const observableMemo = useMemo(observable, [JSON.stringify(deps), JSON.stringify(options)]);
+  const observableMemo = useMemo(observable, [JSON.stringify(deps), JSON.stringify(mergedOptions)]);
 
   useEffect(() => {
     // Set loading state to true when the observable changes
@@ -72,7 +81,7 @@ export function useObservable<T>(
       }));
     }
 
-    const { enabled = true } = options || {};
+    const { enabled } = mergedOptions;
     if (!enabled) return;
 
     const subscription = observableMemo.subscribe({
