@@ -1,16 +1,17 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.30",
+  "version": "1.0.42",
   "description": "Squid React SDK",
   "types": "dist/cjs/index.d.ts",
-  "main": "dist/cjs/index.js",
+  "main": "dist/cjs/src/index.js",
   "scripts": {
     "build": "rollup -c && yalc push",
     "lint": "eslint ./src",
     "format": "prettier --write \"./**/src/**/*{ts,js,tsx,jsx,md,mdx}\"",
     "clean": "rimraf node_modules dist",
     "update": "ncu @squidcloud/client @squidcloud/common -u",
-    "publish:public": "npm run build && npm version patch --no-git-tag-version && npm publish --access public"
+    "publish:public": "npm run build && bash ./publish.sh",
+    "publish:beta": "npm run build && bash ./publish.sh beta"
   },
   "files": [
     "dist/**/*"
@@ -53,7 +54,8 @@
     "yalc": "^1.0.0-pre.53"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.126",
-    "@squidcloud/common": "^1.0.111"
+    "@squidcloud/client": "^1.0.151",
+    "@squidcloud/common": "^1.0.151",
+    "assertic": "^1.0.0"
   }
 }

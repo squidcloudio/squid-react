@@ -1,26 +1,41 @@
 'use client';
 
-import {Pagination, PaginationOptions, SnapshotEmitter} from '@squidcloud/common';
-import {useEffect, useRef, useState} from 'react';
+import { Pagination, PaginationOptions, SnapshotEmitter } from '@squidcloud/common';
+import { useEffect, useRef, useState } from 'react';
 
+/**
+ * Type representing the state and data of a paginated query.
+ *
+ * @template T - The type of the data items within the paginated data set.
+ */
 export type PaginationType<T> = {
+  /** Indicates whether the pagination data is currently being loaded. */
   loading: boolean;
+  /** An array of data items for the current page. */
   data: Array<T>;
+  /** Indicates if there is a next page available. */
   hasNext: boolean;
+  /** Indicates if there is a previous page available. */
   hasPrev: boolean;
+  /** Function to navigate to the next page. */
   next: () => void;
+  /** Function to navigate to the previous page. */
   prev: () => void;
 };
 
 type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
 
 /**
- * Hook to get pagination data, loading state, and navigation functions.
+ * Hook that provides a simple interface for paginating data from a Squid query.
+ * It returns the current pagination state including the data for the current page,
+ * loading status, and functions to navigate to the next and previous pages.
  *
- * @param query The Squid query.
- * @param options The pagination options.
- * @param deps Array of dependencies for the hook. Default is [].
- * @returns The pagination data, loading state, and navigation functions.
+ * @template T - A type extending `SnapshotEmitter`, typically a Squid query.
+ * @param query - The Squid query.
+ * @param options - Pagination options to control the behavior of the pagination.
+ * @param deps - An array of dependencies that, when changed, will reset the pagination and re-run the query.
+ * @returns An object containing the current state of the pagination, including the data for the current page,
+ * loading status, and functions to navigate between pages.
  */
 export function usePagination<T>(
   query: T & SnapshotEmitter<any>,
@@ -28,15 +43,18 @@ export function usePagination<T>(
   deps: ReadonlyArray<unknown> = [],
 ): PaginationType<GetReturnType<T>> {
   const pagination = useRef<Pagination<GetReturnType<T>> | null>(null);
-  const [paginationState, setPaginationState] =
-    useState<PaginationType<GetReturnType<T>>>({
-      loading: true,
-      data: [],
-      hasNext: false,
-      hasPrev: false,
-      next: () => { return; },
-      prev: () => { return; },
-    });
+  const [paginationState, setPaginationState] = useState<PaginationType<GetReturnType<T>>>({
+    loading: true,
+    data: [],
+    hasNext: false,
+    hasPrev: false,
+    next: () => {
+      return;
+    },
+    prev: () => {
+      return;
+    },
+  });
 
   function setLoading() {
     setPaginationState((prevState) => ({
@@ -59,11 +77,11 @@ export function usePagination<T>(
         hasPrev: state.hasPrev,
         next: () => {
           setLoading();
-          pagination.current?.next()
+          pagination.current?.next();
         },
         prev: () => {
           setLoading();
-          pagination.current?.prev()
+          pagination.current?.prev();
         },
       });
     });
