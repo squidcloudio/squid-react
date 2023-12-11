@@ -1,6 +1,6 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "description": "Squid React SDK",
   "types": "dist/cjs/index.d.ts",
   "main": "dist/cjs/src/index.js",
@@ -54,8 +54,8 @@
     "yalc": "^1.0.0-pre.53"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.151",
-    "@squidcloud/common": "^1.0.151",
+    "@squidcloud/client": "^1.0.152",
+    "@squidcloud/common": "^1.0.152",
     "assertic": "^1.0.0"
   }
 }
