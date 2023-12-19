@@ -2,7 +2,7 @@ import { SnapshotEmitter } from '@squidcloud/common';
 import React from 'react';
 import WithQueryClient from './WithQueryClient';
 import {
-  DefaultWithQueryOptions,
+  DEFAULT_WITH_QUERY_OPTIONS,
   WithQueryOptions,
   WithQueryProps,
 } from './index';
@@ -33,7 +33,7 @@ const WithQueryServer = async <C extends React.ComponentType<any>, T>({
 }: PropTypes<C, T>) => {
   const data = await query.snapshot();
 
-  const mergedOptions = { ...DefaultWithQueryOptions, ...options };
+  const mergedOptions = { ...DEFAULT_WITH_QUERY_OPTIONS, ...options };
 
   const propsWithData = {
     ...props,

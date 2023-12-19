@@ -4,7 +4,7 @@ import { DocumentReference } from '@squidcloud/client';
 import { DocumentData } from '@squidcloud/common';
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { DefaultDocOptions, DocOptions } from './useDoc';
+import { DEFAULT_DOC_OPTIONS, DocOptions } from './useDoc';
 
 /**
  * Represents the state and collection of document data returned from a query within the Squid framework.
@@ -33,7 +33,7 @@ export function useDocs<T extends DocumentData>(docs: Array<DocumentReference<T>
   const [data, setData] = useState<Array<T | undefined>>(docs.map((d) => d.peek()));
   const [error, setError] = useState<any>(null);
 
-  const mergedOptions = { ...DefaultDocOptions, ...options };
+  const mergedOptions = { ...DEFAULT_DOC_OPTIONS, ...options };
 
   useEffect(() => {
     setLoading(!!docs.length);

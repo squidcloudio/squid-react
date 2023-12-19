@@ -33,7 +33,7 @@ export interface PaginationOptions extends SquidPaginationOptions {
   enabled?: boolean;
 }
 
-const DefaultPaginationOptions: Required<Omit<PaginationOptions, keyof SquidPaginationOptions>> = {
+const DEFAULT_PAGINATION_OPTIONS: Required<Omit<PaginationOptions, keyof SquidPaginationOptions>> = {
   enabled: true,
 };
 
@@ -54,7 +54,7 @@ export function usePagination<T>(
   options: PaginationOptions,
   deps: ReadonlyArray<unknown> = [],
 ): PaginationType<GetReturnType<T>> {
-  const mergedOptions = { ...DefaultPaginationOptions, ...options };
+  const mergedOptions = { ...DEFAULT_PAGINATION_OPTIONS, ...options };
 
   const pagination = useRef<Pagination<GetReturnType<T>> | null>(null);
   const [paginationState, setPaginationState] = useState<PaginationType<GetReturnType<T>>>({

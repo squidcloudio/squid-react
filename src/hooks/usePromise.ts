@@ -27,7 +27,7 @@ export type PromiseOptions<T> = {
   initialData?: T;
 };
 
-const DefaultPromiseOptions: Required<ObservableOptions<null>> = {
+const DEFAULT_PROMISE_OPTIONS: Required<ObservableOptions<null>> = {
   enabled: true,
   initialData: null,
 };
@@ -58,7 +58,7 @@ export function usePromise<T>(
   options: PromiseOptions<T> = {},
   deps: ReadonlyArray<unknown> = [],
 ): PromiseType<T | null> {
-  const mergedOptions = { ...DefaultPromiseOptions, ...options };
+  const mergedOptions = { ...DEFAULT_PROMISE_OPTIONS, ...options };
 
   const [state, setState] = useState<PromiseType<T | null>>({
     loading: true,

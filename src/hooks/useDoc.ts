@@ -30,7 +30,7 @@ export type DocOptions = {
   subscribe?: boolean;
 };
 
-export const DefaultDocOptions: Required<DocOptions> = {
+export const DEFAULT_DOC_OPTIONS: Required<DocOptions> = {
   enabled: true,
   subscribe: true,
 };
@@ -44,7 +44,7 @@ export const DefaultDocOptions: Required<DocOptions> = {
  * @returns The document data, loading state, and errors.
  */
 export function useDoc<T extends DocumentData>(doc: DocumentReference<T>, options: DocOptions = {}): DocType<T> {
-  const mergedOptions = { ...DefaultDocOptions, ...options };
+  const mergedOptions = { ...DEFAULT_DOC_OPTIONS, ...options };
 
   const { enabled, subscribe } = mergedOptions;
 

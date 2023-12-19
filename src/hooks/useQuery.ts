@@ -40,7 +40,7 @@ export type QueryOptions<T> = {
   initialData?: Array<GetReturnType<T>>;
 };
 
-const DefaultQueryOptions: Required<QueryOptions<null>> = {
+const DEFAULT_QUERY_OPTIONS: Required<QueryOptions<null>> = {
   enabled: true,
   subscribe: true,
   initialData: [],
@@ -62,7 +62,7 @@ export function useQuery<T extends DocumentData>(
   options: QueryOptions<T> = {},
   deps: ReadonlyArray<unknown> = [],
 ): QueryType<GetReturnType<T>> {
-  const mergedOptions = { ...DefaultQueryOptions, ...options };
+  const mergedOptions = { ...DEFAULT_QUERY_OPTIONS, ...options };
 
   const peekInitialValue = () => {
     try {

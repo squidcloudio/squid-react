@@ -30,7 +30,7 @@ export type ObservableOptions<T> = {
   initialData?: T;
 };
 
-const DefaultObservableOption: Required<ObservableOptions<null>> = {
+const DEFAULT_OBSERVABLE_OPTIONS: Required<ObservableOptions<null>> = {
   enabled: true,
   initialData: null,
 };
@@ -60,7 +60,7 @@ export function useObservable<T>(
   options: ObservableOptions<T> = {},
   deps: ReadonlyArray<unknown> = [],
 ): ObservableType<T | null> {
-  const mergedOptions = { ...DefaultObservableOption, ...options };
+  const mergedOptions = { ...DEFAULT_OBSERVABLE_OPTIONS, ...options };
 
   const [state, setState] = useState<ObservableType<T | null>>({
     loading: true,
