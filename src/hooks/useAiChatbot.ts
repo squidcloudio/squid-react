@@ -1,11 +1,11 @@
 'use client';
 
-import { AiChatbotChatOptions, generateId, IntegrationId } from '@squidcloud/common';
-import { assertTruthy } from 'assertic';
-import { useEffect, useState } from 'react';
-import { from, map, of } from 'rxjs';
-import { useObservable } from './useObservable';
-import { useSquid } from './useSquid';
+import {AiChatbotChatOptions, generateId, IntegrationId} from '@squidcloud/common';
+import {assertTruthy} from 'assertic';
+import {useEffect, useState} from 'react';
+import {from, map, of} from 'rxjs';
+import {useObservable} from './useObservable';
+import {useSquid} from './useSquid';
 
 /**
  * Represents a chat message with a unique identifier, the author type, and the message content.
@@ -63,13 +63,20 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
   const [aiChatbotOptions, setAiChatbotOptions] = useState<AiChatbotChatOptions | undefined>(undefined);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
 
-  const { data, error, loading, complete } = useObservable(
+  const {data, error, loading, complete} = useObservable(
     () => {
       if (!question) return of('');
       if (aiQuery) {
         return from(squid.ai().executeAiQuery(integrationId, question)).pipe(
           map((response) => {
-            return response.answer + (response.explanation ? `\n\n${response.explanation}` : '');
+            let result = `### Result\n\n${response.answer}`;
+            if (response.executedQuery) {
+              result += `\n\n### Executed Query\n\n\`\`\`${response.queryMarkdownType || 'sql'}\n${response.executedQuery}\n\`\`\``;
+            }
+            if (response.explanation) {
+              result += `\n\n### Walkthrough\n\n${response.explanation}`;
+            }
+            return result;
           }),
         );
       } else {
@@ -87,7 +94,7 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
     if (!recentChat || !data || loading) return;
     if (complete) setQuestion('');
     if (recentChat.type === 'user') {
-      setHistory((prevMessages) => prevMessages.concat({ id: generateId(), type: 'ai', message: data }));
+      setHistory((prevMessages) => prevMessages.concat({id: generateId(), type: 'ai', message: data}));
     } else {
       setHistory((prevMessages) => {
         const newMessages = [...prevMessages];
@@ -98,10 +105,10 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
   }, [data, complete, loading]);
 
   const chat = (prompt: string, options?: AiChatbotChatOptions) => {
-    setHistory((messages) => messages.concat({ id: generateId(), type: 'user', message: prompt }));
+    setHistory((messages) => messages.concat({id: generateId(), type: 'user', message: prompt}));
     setAiChatbotOptions(options);
     setQuestion(prompt);
   };
 
-  return { chat, history, data, loading, error, complete };
+  return {chat, history, data, loading, error, complete};
 }
