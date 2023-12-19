@@ -14,11 +14,10 @@ export type PropTypes = {
 const Users = ({ title, initialData }: PropTypes) => {
   const collection = useCollection<Person>('people');
 
-  const { data } = useQuery(
-    collection.query().dereference(),
-    true,
+  const { data } = useQuery(collection.query().dereference(), {
+    subscribe: true,
     initialData,
-  );
+  });
 
   const insertFromClient = () => {
     collection.doc().insert({

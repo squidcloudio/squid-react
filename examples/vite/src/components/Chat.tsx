@@ -1,9 +1,9 @@
-import { useAiAssistant } from '@squidcloud/react';
+import { useAiChatbot } from '@squidcloud/react';
 import { useState } from 'react';
 
 const Chat = () => {
   const [value, setValue] = useState('');
-  const { history, chat, complete } = useAiAssistant('rudder', 'grandma');
+  const { history, chat, complete } = useAiChatbot('rudder', 'grandma');
 
   const handleClick = () => {
     chat(value);

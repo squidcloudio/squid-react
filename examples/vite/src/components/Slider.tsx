@@ -14,7 +14,7 @@ const Slider = ({ name, min, max, defaultValue }: PropTypes) => {
   const events = useCollection<Event>('events');
 
   const doc = events.doc(name);
-  const { data } = useDoc(doc, true);
+  const { data } = useDoc(doc, { subscribe: true });
 
   useEffect(() => {
     const createSlider = async (): Promise<void> => {

@@ -18,12 +18,13 @@ export type Event = {
 
 function App(): JSX.Element {
   const [hide, setHide] = useState(false);
+  const [enabled, setEnabled] = useState(false);
 
   const people = useCollection<Person>('people');
   const events = useCollection<Event>('events');
   const { loading, data } = useQuery(
     events.query().eq('name', 'slider').dereference(),
-    true,
+    { subscribe: true, enabled },
   );
 
   function toggle(): void {
@@ -31,7 +32,23 @@ function App(): JSX.Element {
   }
 
   if (loading) {
-    return <span>Loading...</span>;
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <span>Loading...</span>
+        <button
+          style={{ marginTop: '32px' }}
+          onClick={() => setEnabled(!enabled)}
+        >
+          {enabled ? 'Disabled' : 'Enable'}
+        </button>
+      </div>
+    );
   }
 
   const age = data[0]?.value || 30;
@@ -49,22 +66,30 @@ function App(): JSX.Element {
           <Slider name="slider" min={1} max={99} defaultValue={30} />
           <div style={{ display: 'flex' }}>
             <Docs />
-            <Query query={people.query()} description="All" />
+            <Query query={people.query()} description="All" enabled={enabled} />
             <Query
               query={people.query().where('age', '>', age)}
               description={`> ${age}`}
+              enabled={enabled}
             />
             <Query
               query={people.query().where('age', '<=', age)}
               description={`<= ${age}`}
+              enabled={enabled}
             />
           </div>
-          <Pages />
+          <Pages enabled={enabled} />
           <Chat />
         </div>
       )}
       <button style={{ marginTop: '32px' }} onClick={toggle}>
         {hide ? 'Mount' : 'Unmount'}
+      </button>
+      <button
+        style={{ marginTop: '32px' }}
+        onClick={() => setEnabled(!enabled)}
+      >
+        {enabled ? 'Disabled' : 'Enable'}
       </button>
     </div>
   );
@@ -75,12 +100,13 @@ export default App;
 type QueryProps = {
   query: QueryBuilder<Person>;
   description: string;
+  enabled: boolean;
 };
 
 const Docs = <T,>(): JSX.Element => {
   const [docs, setDocs] = useState<Array<DocumentReference<Person>>>([]);
   const collection = useCollection<Person>('people');
-  const { loading } = useDocs(docs, true);
+  const { loading } = useDocs(docs, { subscribe: true });
 
   function add(): void {
     const doc = collection.doc();
@@ -126,8 +152,8 @@ const Docs = <T,>(): JSX.Element => {
   );
 };
 
-const Query = ({ query, description }: QueryProps): JSX.Element => {
-  const { loading, data } = useQuery(query, true);
+const Query = ({ query, description, enabled }: QueryProps): JSX.Element => {
+  const { loading, data } = useQuery(query, { subscribe: true, enabled });
 
   function update(): void {
     for (const doc of data) {

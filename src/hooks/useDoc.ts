@@ -19,18 +19,38 @@ export type DocType<T extends DocumentData> = {
   error: any;
 };
 
+export type DocOptions = {
+  /**
+   * Determines whether to query the document data automatically. Defaults to `true`. When set to `false`, executing the
+   * query will be delayed until `enabled` is set to `true`.
+   */
+  enabled?: boolean;
+
+  /** Whether to subscribe to document updates. Defaults to `true`. */
+  subscribe?: boolean;
+};
+
+export const DEFAULT_DOC_OPTIONS: Required<DocOptions> = {
+  enabled: true,
+  subscribe: true,
+};
+
 /**
  * Hook to get a Squid document data, loading state, and errors.
  *
  * @template T extends DocumentData
  * @param doc Squid document reference.
- * @param subscribe Whether to subscribe to document updates. Default is false.
+ * @param options Options to control the behavior of the document query.
  * @returns The document data, loading state, and errors.
  */
-export function useDoc<T extends DocumentData>(doc: DocumentReference<T>, subscribe = false): DocType<T> {
+export function useDoc<T extends DocumentData>(doc: DocumentReference<T>, options: DocOptions = {}): DocType<T> {
+  const mergedOptions = { ...DEFAULT_DOC_OPTIONS, ...options };
+
+  const { enabled, subscribe } = mergedOptions;
+
   const { loading, error, data } = useObservable<T | undefined>(
     () => (subscribe ? doc.snapshots() : from(doc.snapshot())),
-    doc.peek(),
+    { enabled, initialData: doc.peek() },
     [doc.refId, subscribe],
   );
 

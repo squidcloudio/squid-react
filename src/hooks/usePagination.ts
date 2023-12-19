@@ -1,6 +1,6 @@
 'use client';
 
-import { Pagination, PaginationOptions, SnapshotEmitter } from '@squidcloud/common';
+import { Pagination, SnapshotEmitter, PaginationOptions as SquidPaginationOptions } from '@squidcloud/common';
 import { useEffect, useRef, useState } from 'react';
 
 /**
@@ -25,6 +25,18 @@ export type PaginationType<T> = {
 
 type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
 
+export interface PaginationOptions extends SquidPaginationOptions {
+  /**
+   * Determines whether to execute the pagination query automatically. Defaults to `true`. When set to `false`,
+   * executing the query will be delayed until `enabled` is set to `true`.
+   */
+  enabled?: boolean;
+}
+
+const DEFAULT_PAGINATION_OPTIONS: Required<Omit<PaginationOptions, keyof SquidPaginationOptions>> = {
+  enabled: true,
+};
+
 /**
  * Hook that provides a simple interface for paginating data from a Squid query.
  * It returns the current pagination state including the data for the current page,
@@ -42,6 +54,8 @@ export function usePagination<T>(
   options: PaginationOptions,
   deps: ReadonlyArray<unknown> = [],
 ): PaginationType<GetReturnType<T>> {
+  const mergedOptions = { ...DEFAULT_PAGINATION_OPTIONS, ...options };
+
   const pagination = useRef<Pagination<GetReturnType<T>> | null>(null);
   const [paginationState, setPaginationState] = useState<PaginationType<GetReturnType<T>>>({
     loading: true,
@@ -68,7 +82,10 @@ export function usePagination<T>(
   useEffect(() => {
     setLoading();
 
-    pagination.current = query.paginate(options);
+    const { enabled } = mergedOptions;
+    if (!enabled) return;
+
+    pagination.current = query.paginate(mergedOptions);
     const subscription = pagination.current.observeState().subscribe((state) => {
       setPaginationState({
         loading: false,
@@ -93,7 +110,7 @@ export function usePagination<T>(
         subscription.unsubscribe();
       }, 0);
     };
-  }, [JSON.stringify(deps), JSON.stringify(options)]);
+  }, [JSON.stringify(deps), JSON.stringify(mergedOptions)]);
 
   return paginationState;
 }
