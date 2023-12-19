@@ -13,6 +13,7 @@ export type WithQueryOptions = {
   subscribe?: boolean;
 };
 
+/** @internal */
 export const DEFAULT_WITH_QUERY_OPTIONS: Required<WithQueryOptions> = {
   subscribe: true,
 };

@@ -25,7 +25,7 @@ export type PaginationType<T> = {
 
 type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
 
-export interface PaginationOptions extends SquidPaginationOptions {
+interface PaginationOptions extends SquidPaginationOptions {
   /**
    * Determines whether to execute the pagination query automatically. Defaults to `true`. When set to `false`,
    * executing the query will be delayed until `enabled` is set to `true`.

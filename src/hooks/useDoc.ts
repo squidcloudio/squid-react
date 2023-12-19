@@ -30,6 +30,7 @@ export type DocOptions = {
   subscribe?: boolean;
 };
 
+/** @internal */
 export const DEFAULT_DOC_OPTIONS: Required<DocOptions> = {
   enabled: true,
   subscribe: true,
