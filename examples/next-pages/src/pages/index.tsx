@@ -1,6 +1,5 @@
 import Users, { Person } from '@/components/Users';
-import { Squid } from '@squidcloud/client';
-import { SupportedSquidRegion } from '@squidcloud/common';
+import { Squid, SupportedSquidRegion } from '@squidcloud/client';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 export default function Home({

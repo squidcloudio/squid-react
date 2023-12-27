@@ -1,7 +1,6 @@
 'use client';
 
-import { deserializeQuery } from '@squidcloud/client';
-import { SerializedQuery } from '@squidcloud/common';
+import { deserializeQuery, SerializedQuery } from '@squidcloud/client';
 import React from 'react';
 import { useQuery, useSquid } from '../../hooks';
 import { WithQueryProps } from './index';

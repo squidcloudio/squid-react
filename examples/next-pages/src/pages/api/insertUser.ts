@@ -1,8 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { Person } from '@/components/Users';
 import { randomAge, randomName } from '@/data/names';
-import { Squid } from '@squidcloud/client';
-import { SupportedSquidRegion } from '@squidcloud/common';
+import { Squid, SupportedSquidRegion } from '@squidcloud/client';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Person>) {

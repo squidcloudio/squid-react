@@ -26,6 +26,10 @@
     "react-dom": "^16.11.0 || ^17 || ^18",
     "rxjs": ">=7.5.7 <8.0.0"
   },
+  "dependencies": {
+    "@squidcloud/client": "^1.0.157",
+    "assertic": "^1.0.0"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-json": "^6.0.0",
@@ -53,10 +57,5 @@
     "rollup-plugin-preserve-directives": "^0.2.0",
     "rollup-plugin-typescript2": "^0.34.1",
     "yalc": "^1.0.0-pre.53"
-  },
-  "dependencies": {
-    "@squidcloud/client": "^1.0.156",
-    "@squidcloud/common": "^1.0.156",
-    "assertic": "^1.0.0"
   }
 }

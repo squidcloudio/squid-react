@@ -1,4 +1,4 @@
-import { SupportedSquidRegion } from '@squidcloud/common';
+import { SupportedSquidRegion } from '@squidcloud/client';
 import { SquidContextProvider } from '@squidcloud/react';
 import ReactDOM from 'react-dom/client';
 import App from './App';

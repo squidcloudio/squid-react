@@ -1,7 +1,6 @@
 'use client';
 
-import { DocumentReference } from '@squidcloud/client';
-import { DocumentData } from '@squidcloud/common';
+import { DocumentData, DocumentReference } from '@squidcloud/client';
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { DEFAULT_DOC_OPTIONS, DocOptions } from './useDoc';
