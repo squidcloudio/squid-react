@@ -1,5 +1,5 @@
 import '@/styles/globals.css';
-import { SupportedSquidRegion } from '@squidcloud/common';
+import { SupportedSquidRegion } from '@squidcloud/client';
 import { SquidContextProvider } from '@squidcloud/react';
 import type { AppProps } from 'next/app';
 

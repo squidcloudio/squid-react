@@ -1,7 +1,6 @@
 'use client';
 
-import { CollectionReference } from '@squidcloud/client';
-import { CollectionName, DocumentData, IntegrationId } from '@squidcloud/common';
+import { CollectionName, CollectionReference, DocumentData, IntegrationId } from '@squidcloud/client';
 import React from 'react';
 import { SquidContext } from '../context';
 import { useSquid } from './useSquid';

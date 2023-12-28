@@ -1,7 +1,6 @@
 'use client';
 
-import { DocumentReference } from '@squidcloud/client';
-import { DocumentData } from '@squidcloud/common';
+import { DocumentData, DocumentReference } from '@squidcloud/client';
 import { from } from 'rxjs';
 import { useObservable } from './useObservable';
 

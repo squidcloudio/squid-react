@@ -1,4 +1,4 @@
-import { SnapshotEmitter } from '@squidcloud/common';
+import { SnapshotEmitter } from '@squidcloud/client';
 import React from 'react';
 import WithQueryServer from './WithQueryServer';
 

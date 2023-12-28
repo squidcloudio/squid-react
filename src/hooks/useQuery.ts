@@ -1,6 +1,6 @@
 'use client';
 
-import { DocumentData, SnapshotEmitter } from '@squidcloud/common';
+import { DocumentData, SnapshotEmitter } from '@squidcloud/client';
 import { from } from 'rxjs';
 import { useObservable } from './useObservable';
 

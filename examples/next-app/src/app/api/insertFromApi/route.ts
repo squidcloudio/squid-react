@@ -1,7 +1,6 @@
 import { Person } from '@/components/Users';
 import { randomAge, randomName } from '@/data/names';
-import { Squid } from '@squidcloud/client';
-import { SupportedSquidRegion } from '@squidcloud/common';
+import { Squid, SupportedSquidRegion } from '@squidcloud/client';
 import { NextResponse } from 'next/server';
 
 export async function POST() {

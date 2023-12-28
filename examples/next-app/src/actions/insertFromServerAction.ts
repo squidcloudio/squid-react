@@ -2,8 +2,7 @@
 
 import { Person } from '@/components/Users';
 import { randomAge, randomName } from '@/data/names';
-import { Squid } from '@squidcloud/client';
-import { SupportedSquidRegion } from '@squidcloud/common';
+import { Squid, SupportedSquidRegion } from '@squidcloud/client';
 
 export default async function insertFromServerAction() {
   const squid = Squid.getInstance({
