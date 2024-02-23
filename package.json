@@ -27,7 +27,7 @@
     "rxjs": ">=7.5.7 <8.0.0"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.158",
+    "@squidcloud/client": "^1.0.183",
     "assertic": "^1.0.0"
   },
   "devDependencies": {
