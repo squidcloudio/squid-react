@@ -8,4 +8,5 @@ export * from './useObservable';
 export * from './usePagination';
 export * from './usePromise';
 export * from './useQuery';
+export * from './useQueue';
 export * from './useSquid';

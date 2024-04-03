@@ -11,6 +11,7 @@ const Chat = () => {
 
   return (
     <>
+      <h2>Chat</h2>
       <input onChange={(e) => setValue(e.target.value)} value={value} />
       <button onClick={handleClick} disabled={!complete}>
         Chat
