@@ -21,8 +21,8 @@ export function useCollection<T extends DocumentData>(
 ): CollectionReference<T> {
   const context = React.useContext(SquidContext);
 
-  if (context === undefined) {
-    throw new Error('useSquid must be used within a SquidContext.Provider');
+  if (!context) {
+    throw new Error('useCollection must be used within a SquidContext.Provider');
   }
 
   return useSquid().collection<T>(collectionName, integrationId);
