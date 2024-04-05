@@ -31,7 +31,7 @@ const DEFAULT_QUEUE_OPTIONS: Required<QueueOptions> = {
 };
 
 export function useQueue<T>(
-  queue: QueueManager,
+  queue: QueueManager<T>,
   options: QueueOptions = {},
   deps: ReadonlyArray<unknown> = [],
 ): QueueType<T> {
