@@ -3,6 +3,7 @@ import { useCollection, useDocs, useQuery } from '@squidcloud/react';
 import { useState } from 'react';
 import Chat from './components/Chat';
 import Pages from './components/Pages';
+import Queue from './components/Queue';
 import Slider from './components/Slider';
 import { randomAge, randomName } from './data/names';
 
@@ -80,6 +81,7 @@ function App(): JSX.Element {
           </div>
           <Pages enabled={enabled} />
           <Chat />
+          <Queue />
         </div>
       )}
       <button style={{ marginTop: '32px' }} onClick={toggle}>
