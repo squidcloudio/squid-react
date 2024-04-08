@@ -13,7 +13,7 @@ import { SquidContext } from '../context';
 export function useSquid(): Squid {
   const context = React.useContext(SquidContext);
 
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useSquid must be used within a SquidContext.Provider');
   }
 
