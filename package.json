@@ -1,6 +1,6 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.48",
+  "version": "1.0.49",
   "description": "Squid React SDK",
   "types": "dist/cjs/index.d.ts",
   "main": "dist/cjs/index.js",
@@ -9,7 +9,7 @@
     "lint": "eslint ./src",
     "format": "prettier --write \"./**/src/**/*{ts,js,tsx,jsx,md,mdx}\"",
     "clean": "rimraf node_modules dist",
-    "update": "ncu @squidcloud/client @squidcloud/common -u",
+    "update": "ncu @squidcloud/client -u",
     "publish:public": "npm run build && bash ./publish.sh",
     "publish:beta": "npm run build && bash ./publish.sh beta"
   },
@@ -27,7 +27,7 @@
     "rxjs": ">=7.5.7 <8.0.0"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.211",
+    "@squidcloud/client": "^1.0.220",
     "assertic": "^1.0.0"
   },
   "devDependencies": {
