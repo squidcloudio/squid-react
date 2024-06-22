@@ -50,7 +50,7 @@ const DEFAULT_PAGINATION_OPTIONS: Required<Omit<PaginationOptions, keyof SquidPa
  * loading status, and functions to navigate between pages.
  */
 export function usePagination<T>(
-  query: T & SnapshotEmitter<any>,
+  query: Pick<SnapshotEmitter<any>, 'paginate'>,
   options: PaginationOptions,
   deps: ReadonlyArray<unknown> = [],
 ): PaginationType<GetReturnType<T>> {
