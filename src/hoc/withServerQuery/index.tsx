@@ -3,6 +3,11 @@ import React from 'react';
 import WithQueryServer from './WithQueryServer';
 
 export interface WithQueryProps<T> {
+  /**
+   * The data returned from the `query` passed to the `withServerQuery` HOC. On initial render, the data will be
+   * passed from the server. If the component subscribes to query snaphosts, the data will be updated whenever the
+   * query results change.
+   */
   data: Array<T>;
 }
 
