@@ -23,8 +23,6 @@ export type PaginationType<T> = {
   prev: () => void;
 };
 
-type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
-
 interface PaginationOptions extends SquidPaginationOptions {
   /**
    * Determines whether to execute the pagination query automatically. Defaults to `true`. When set to `false`,
@@ -50,14 +48,14 @@ const DEFAULT_PAGINATION_OPTIONS: Required<Omit<PaginationOptions, keyof SquidPa
  * loading status, and functions to navigate between pages.
  */
 export function usePagination<T>(
-  query: Pick<SnapshotEmitter<any>, 'paginate'>,
+  query: Pick<SnapshotEmitter<T>, 'paginate'>,
   options: PaginationOptions,
   deps: ReadonlyArray<unknown> = [],
-): PaginationType<GetReturnType<T>> {
+): PaginationType<T> {
   const mergedOptions = { ...DEFAULT_PAGINATION_OPTIONS, ...options };
 
-  const pagination = useRef<Pagination<GetReturnType<T>> | null>(null);
-  const [paginationState, setPaginationState] = useState<PaginationType<GetReturnType<T>>>({
+  const pagination = useRef<Pagination<T> | null>(null);
+  const [paginationState, setPaginationState] = useState<PaginationType<T>>({
     loading: true,
     data: [],
     hasNext: false,
