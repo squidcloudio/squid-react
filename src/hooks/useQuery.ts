@@ -1,6 +1,6 @@
 'use client';
 
-import { DocumentData, SnapshotEmitter } from '@squidcloud/client';
+import { SnapshotEmitter } from '@squidcloud/client';
 import { from } from 'rxjs';
 import { useObservable } from './useObservable';
 
@@ -17,8 +17,6 @@ export type QueryType<T> = {
   /** Any error that may have occurred during the query execution. */
   error: any;
 };
-
-type GetReturnType<T> = T extends SnapshotEmitter<infer U> ? U : never;
 
 export type QueryOptions<T> = {
   /**
@@ -37,14 +35,16 @@ export type QueryOptions<T> = {
    * An optional array of initial data items to be used before the query resolves for the first time. If a parent query
    * is active, this defaults to data currently available the client. Otherwise, the default is an empty array.
    */
-  initialData?: Array<GetReturnType<T>>;
+  initialData?: Array<T>;
 };
 
-const DEFAULT_QUERY_OPTIONS: Required<QueryOptions<null>> = {
-  enabled: true,
-  subscribe: true,
-  initialData: [],
-};
+function getDefaultQueryOptions<T>(): Required<QueryOptions<T>> {
+  return {
+    enabled: true,
+    subscribe: true,
+    initialData: [],
+  };
+}
 
 /**
  * Hook that provides state management for Squid queries, giving access to the data items,
@@ -57,12 +57,12 @@ const DEFAULT_QUERY_OPTIONS: Required<QueryOptions<null>> = {
  * @param deps - An array of dependencies that, when changed, will cause the hook to resubscribe to the query updates.
  * @returns An object containing the current state of the query operation: the loading status, the array of data items, and any error.
  */
-export function useQuery<T extends DocumentData>(
-  query: T & SnapshotEmitter<any>,
+export function useQuery<T>(
+  query: SnapshotEmitter<T>,
   options: QueryOptions<T> = {},
   deps: ReadonlyArray<unknown> = [],
-): QueryType<GetReturnType<T>> {
-  const mergedOptions = { ...DEFAULT_QUERY_OPTIONS, ...options };
+): QueryType<T> {
+  const mergedOptions = { ...getDefaultQueryOptions<T>(), ...options };
 
   const peekInitialValue = () => {
     try {
@@ -74,7 +74,7 @@ export function useQuery<T extends DocumentData>(
 
   const { enabled, subscribe, initialData } = mergedOptions;
 
-  const { loading, error, data } = useObservable<GetReturnType<T>[]>(
+  const { loading, error, data } = useObservable<Array<T>>(
     () => (subscribe ? query.snapshots() : from(query.snapshot())),
     { enabled, initialData: initialData || peekInitialValue() },
     [JSON.stringify(query.serialize()), subscribe, JSON.stringify(deps)],
