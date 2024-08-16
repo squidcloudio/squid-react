@@ -43,7 +43,16 @@ interface AiHookResponse {
  * @returns An object containing methods and state for AI chat interactions.
  */
 export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
-  return useAiHook(integrationId, true);
+  return useAiHook([integrationId], true);
+}
+
+/**
+ * Custom hook for making AI queries with multiple database integration IDs.
+ * @param integrationIds - The unique identifiers for the database integrations.
+ * @returns An object containing methods and state for AI chat interactions.
+ */
+export function useAiQueryMulti(integrationIds: Array<IntegrationId>): AiHookResponse {
+  return useAiHook(integrationIds, true);
 }
 
 /**
@@ -53,10 +62,10 @@ export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
  * @returns An object containing methods and state for AI chat interactions.
  */
 export function useAiChatbot(integrationId: IntegrationId, profileId: string): AiHookResponse {
-  return useAiHook(integrationId, false, profileId);
+  return useAiHook([integrationId], false, profileId);
 }
 
-function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string): AiHookResponse {
+function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profileId?: string): AiHookResponse {
   const squid = useSquid();
   assertTruthy(!aiQuery || squid.options.apiKey, 'apiKey must be defined for AI queries');
   const [question, setQuestion] = useState('');
@@ -67,13 +76,20 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
     () => {
       if (!question) return of('');
       if (aiQuery) {
-        return from(squid.ai().executeAiQuery(integrationId, question)).pipe(
-          map((response) => {
+        return from(squid.ai().executeAiQueryMulti(integrationIds, question)).pipe(
+          map((response, index) => {
             let result = `### Result\n\n${response.answer}`;
-            if (response.executedQuery) {
-              result += `\n\n### Executed Query\n\n\`\`\`${response.queryMarkdownType || 'sql'}\n${
-                response.executedQuery
-              }\n\`\`\``;
+            const numOfExecutesQueries = response.executedQueries.length;
+            if (numOfExecutesQueries) {
+              for (const executedQuery of response.executedQueries) {
+                if (numOfExecutesQueries > 1 && index === 0) {
+                  result += `\n\n### Executed Queries\n\n`;
+                }
+                const prefix = numOfExecutesQueries > 1 ? `#### Query ${index + 1}` : '### Executed Query';
+                result += `\n\n${prefix}\n\n\`\`\`${executedQuery.markdownType || 'sql'}\n${
+                  executedQuery.query
+                }\n\`\`\``;
+              }
             }
             if (response.explanation) {
               result += `\n\n### Walkthrough\n\n${response.explanation}`;
@@ -83,6 +99,7 @@ function useAiHook(integrationId: string, aiQuery: boolean, profileId?: string):
         );
       } else {
         assertTruthy(profileId, 'profileId must be defined');
+        const integrationId = integrationIds[0];
         return squid.ai().chatbot(integrationId).profile(profileId).chat(question, aiChatbotOptions);
       }
     },
