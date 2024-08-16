@@ -77,15 +77,16 @@ function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profileId?: 
       if (!question) return of('');
       if (aiQuery) {
         return from(squid.ai().executeAiQueryMulti(integrationIds, question)).pipe(
-          map((response, index) => {
+          map((response) => {
             let result = `### Result\n\n${response.answer}`;
             const numOfExecutesQueries = response.executedQueries.length;
             if (numOfExecutesQueries) {
-              for (const executedQuery of response.executedQueries) {
-                if (numOfExecutesQueries > 1 && index === 0) {
+              for (let i = 0; i < response.executedQueries.length; i++){
+                const executedQuery = response.executedQueries[i];
+                if (numOfExecutesQueries > 1 && i === 0) {
                   result += `\n\n### Executed Queries\n\n`;
                 }
-                const prefix = numOfExecutesQueries > 1 ? `#### Query ${index + 1}` : '### Executed Query';
+                const prefix = numOfExecutesQueries > 1 ? `#### Query ${i + 1}` : '### Executed Query';
                 result += `\n\n${prefix}\n\n\`\`\`${executedQuery.markdownType || 'sql'}\n${
                   executedQuery.query
                 }\n\`\`\``;
