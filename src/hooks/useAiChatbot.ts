@@ -2,8 +2,6 @@
 
 import {
   AiChatbotChatOptions,
-  AiTranscribeAndAskResponse,
-  AskOptionsWithoutVoice,
   AskWithVoiceResponse,
   generateId,
   IntegrationId,
@@ -12,39 +10,72 @@ import {
 } from '@squidcloud/client';
 import { assertTruthy } from 'assertic';
 import { useEffect, useState } from 'react';
-import { from, map, mergeMap, of } from 'rxjs';
+import { from, map, mergeMap, of, tap } from 'rxjs';
 import { useObservable } from './useObservable';
 import { useSquid } from './useSquid';
 
-/**
- * Represents a chat message with a unique identifier, the author type, and the message content.
- */
 export type ChatMessage = {
-  /** A unique identifier for the message. */
   id: string;
-  /** The type of the message, indicating whether it's from the AI or the user. */
   type: 'ai' | 'user';
-  /** The actual message content. */
   message: string;
-  /** The voice file associated with the message. */
   voiceFile?: File;
 };
 
-/**
- * Interface for the response object from AI hooks that manage the state and lifecycle of AI chats.
- */
 interface AiHookResponse {
-  /** Function to send a new message to the chat. */
+  /**
+   * Method to initiate a chat with the AI.
+   * @param {string} prompt - The input prompt to send to the AI.
+   * @param {AiChatbotChatOptions} [options] - Optional configurations for the chat.
+   */
   chat: (prompt: string, options?: AiChatbotChatOptions) => void;
-  /** Array containing the history of chat messages. */
+
+  /**
+   * Method to transcribe an audio file and then chat with the AI.
+   * @param {File} fileToTranscribe - The audio file to transcribe.
+   * @param {AiChatbotChatOptions} [options] - Optional configurations for the chat.
+   */
+  transcribeAndChat: (fileToTranscribe: File, options?: AiChatbotChatOptions) => void;
+
+  /**
+   * Method to initiate a chat with the AI and receive a voice response.
+   * @param {string} prompt - The input prompt to send to the AI.
+   * @param {Omit<AiChatbotChatOptions, 'smoothTyping'>} [options] - Optional configurations for the chat.
+   */
+  chatWithVoiceResponse: (prompt: string, options?: Omit<AiChatbotChatOptions, 'smoothTyping'>) => void;
+
+  /**
+   * Method to transcribe an audio file, chat with the AI, and receive a voice response.
+   * @param {File} fileToTranscribe - The audio file to transcribe.
+   * @param {Omit<AiChatbotChatOptions, 'smoothTyping'>} [options] - Optional configurations for the chat.
+   */
+  transcribeAndChatWithVoiceResponse: (
+    fileToTranscribe: File,
+    options?: Omit<AiChatbotChatOptions, 'smoothTyping'>,
+  ) => void;
+
+  /**
+   * History of chat messages.
+   */
   history: ChatMessage[];
-  /** The latest AI response or data received. */
+
+  /**
+   * Data received from the AI response.
+   */
   data: string;
-  /** Indicates whether the AI response is currently being fetched. */
+
+  /**
+   * Loading state indicating whether an operation is in progress.
+   */
   loading: boolean;
-  /** Contains an error if one occurred during the last AI operation. */
+
+  /**
+   * Error encountered during an operation, if any.
+   */
   error: any;
-  /** Indicates whether the AI has completed its response. */
+
+  /**
+   * Indicates whether the current operation is complete.
+   */
   complete: boolean;
 }
 
@@ -66,12 +97,6 @@ export function useAiQueryMulti(integrationIds: Array<IntegrationId>): AiHookRes
   return useAiHook(integrationIds, true);
 }
 
-/**
- * Custom hook for interacting with an AI chatbot, scoped to a specific AI integration and profile within the integration.
- * @param integrationId - The unique identifier for the AI integration.
- * @param profileId - The identifier for the profile within the AI integration.
- * @returns An object containing methods and state for AI chat interactions.
- */
 export function useAiChatbot(integrationId: IntegrationId, profileId: string): AiHookResponse {
   return useAiHook([integrationId], false, profileId);
 }
@@ -79,15 +104,16 @@ export function useAiChatbot(integrationId: IntegrationId, profileId: string): A
 function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profileId?: string): AiHookResponse {
   const squid = useSquid();
   assertTruthy(!aiQuery || squid.options.apiKey, 'apiKey must be defined for AI queries');
-  const [question, setQuestion] = useState('');
-  const [aiChatbotOptions, setAiChatbotOptions] = useState<AiChatbotChatOptions | undefined>(undefined);
+  const [file, setFile] = useState<File | null>(null);
+  const [prompt, setPrompt] = useState('');
+  const [options, setOptions] = useState<AiChatbotChatOptions | undefined>(undefined);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
 
   const { data, error, loading, complete } = useObservable(
     () => {
-      if (!question) return of('');
       if (aiQuery) {
-        return from(squid.ai().executeAiQueryMulti(integrationIds, question)).pipe(
+        if (!prompt) return of('');
+        return from(squid.ai().executeAiQueryMulti(integrationIds, prompt)).pipe(
           map((response) => {
             let result = `### Result\n\n${response.answer}`;
             const numOfExecutesQueries = response.executedQueries.length;
@@ -106,193 +132,155 @@ function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profileId?: 
             if (response.explanation) {
               result += `\n\n### Walkthrough\n\n${response.explanation}`;
             }
+
+            setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: result }]);
             return result;
           }),
         );
-      } else {
-        assertTruthy(profileId, 'profileId must be defined');
-        const integrationId = integrationIds[0];
-        return squid.ai().chatbot(integrationId).profile(profileId).chat(question, aiChatbotOptions);
       }
+
+      assertTruthy(profileId, 'profileId must be defined');
+      const integrationId = integrationIds[0];
+      if (file) {
+        if (options?.voiceOptions) {
+          return from(
+            squid.ai().chatbot(integrationId).profile(profileId).transcribeAndAskWithVoiceResponse(file, options),
+          ).pipe(
+            map((response: TranscribeAndAskWithVoiceResponse) => {
+              setHistory((prev) => [
+                ...prev,
+                { id: generateId(), type: 'user', message: response.transcribedPrompt, voiceFile: file },
+                {
+                  id: generateId(),
+                  type: 'ai',
+                  message: response.responseString,
+                  voiceFile: response.voiceResponseFile,
+                },
+              ]);
+              return response.responseString;
+            }),
+          );
+        } else {
+          const userMessageId = generateId();
+          const aiMessageId = generateId();
+
+          return from(squid.ai().chatbot(integrationId).profile(profileId).transcribeAndChat(file, options)).pipe(
+            mergeMap((response: TranscribeAndChatResponse) => {
+              setHistory((prev) => {
+                const prevCopy = [...prev];
+                const prevIndex = prevCopy.findIndex((item) => item.id === userMessageId);
+                if (prevIndex >= 0) {
+                  return prevCopy;
+                }
+                prevCopy.push({ id: userMessageId, type: 'user', message: response.transcribedPrompt });
+                return prevCopy;
+              });
+
+              return response.responseStream;
+            }),
+            tap((response) => {
+              setHistory((prev) => {
+                const prevCopy = [...prev];
+                const prevIndex = prevCopy.findIndex((item) => item.id === aiMessageId);
+                if (prevIndex >= 0) {
+                  prevCopy[prevIndex] = { id: aiMessageId, type: 'ai', message: response };
+                  return prevCopy;
+                }
+                prevCopy.push({ id: aiMessageId, type: 'ai', message: response });
+                return prevCopy;
+              });
+              return response;
+            }),
+          );
+        }
+      } else if (prompt) {
+        if (options?.voiceOptions) {
+          return from(squid.ai().chatbot(integrationId).profile(profileId).askWithVoiceResponse(prompt, options)).pipe(
+            map((response: AskWithVoiceResponse) => {
+              setHistory((prev) => [
+                ...prev,
+                { id: generateId(), type: 'user', message: prompt },
+                {
+                  id: generateId(),
+                  type: 'ai',
+                  message: response.responseString,
+                  voiceFile: response.voiceResponseFile,
+                },
+              ]);
+              return response.responseString;
+            }),
+          );
+        } else {
+          const id = generateId();
+          return squid
+            .ai()
+            .chatbot(integrationId)
+            .profile(profileId)
+            .chat(prompt, options)
+            .pipe(
+              tap((response) => {
+                setHistory((prev) => {
+                  const prevCopy = [...prev];
+                  // Update the prev with the same id if exists else create a new one
+                  const prevIndex = prevCopy.findIndex((item) => item.id === id);
+                  if (prevIndex >= 0) {
+                    prevCopy[prevIndex] = { id, type: 'ai', message: response };
+                    return prevCopy;
+                  }
+                  prevCopy.push({ id, type: 'ai', message: response });
+                  return prevCopy;
+                });
+              }),
+            );
+        }
+      }
+      return of('');
     },
     { initialData: '' },
-    [question],
+    [file, prompt],
   );
 
   useEffect(() => {
-    const recentChat = history[history.length - 1];
-
-    if (!recentChat || !data || loading) return;
-    if (complete) setQuestion('');
-    if (recentChat.type === 'user') {
-      setHistory((prevMessages) => prevMessages.concat({ id: generateId(), type: 'ai', message: data }));
-    } else {
-      setHistory((prevMessages) => {
-        const newMessages = [...prevMessages];
-        newMessages[newMessages.length - 1].message = data;
-        return newMessages;
-      });
+    if (complete) {
+      setFile(null);
+      setPrompt('');
     }
-  }, [data, complete, loading]);
+  }, [complete]);
 
-  const chat = (prompt: string, options?: AiChatbotChatOptions) => {
-    setHistory((messages) => messages.concat({ id: generateId(), type: 'user', message: prompt }));
-    setAiChatbotOptions(options);
-    setQuestion(prompt);
-  };
-
-  return { chat, history, data, loading, error, complete };
-}
-
-export function useAiTranscribeAndChat(integrationId: IntegrationId, profileId: string) {
-  const squid = useSquid();
-  const [file, setFile] = useState<File | null>(null);
-  const [options, setOptions] = useState<AiChatbotChatOptions | undefined>(undefined);
-  const [history, setHistory] = useState<Array<ChatMessage>>([]);
-
-  const { data, error, loading, complete } = useObservable<string>(
-    () => {
-      if (!file) return of('');
-      return from(squid.ai().chatbot(integrationId).profile(profileId).transcribeAndChat(file, options)).pipe(
-        mergeMap((response: TranscribeAndChatResponse) => {
-          setHistory((prev): Array<ChatMessage> => [...prev, {
-            id: generateId(),
-            type: 'user',
-            message: response.transcribedPrompt,
-            voiceFile: file,
-          }]);
-          return response.responseStream;
-        }),
-      );
-    },
-    { initialData: '' },
-    [file],
-  );
-
-  useEffect(() => {
-    if (!data || loading) return;
-    if (complete) setFile(null);
-    setHistory(prev => {
-      const newHistory = [...prev];
-      const lastMessage = newHistory[newHistory.length - 1];
-      if (lastMessage && lastMessage.type === 'ai') {
-        lastMessage.message = data;
-      } else {
-        newHistory.push({ id: generateId(), type: 'ai', message: data });
-      }
-      return newHistory;
-    });
-  }, [data, complete, loading]);
-
-  const chat = (fileToTranscribe: File, chatOptions?: AiChatbotChatOptions) => {
-    setFile(fileToTranscribe);
-    setOptions(chatOptions);
-  };
-
-  return { chat, history, data, loading, error, complete };
-}
-
-export function useAiTranscribeAndAsk(integrationId: IntegrationId, profileId: string) {
-  const squid = useSquid();
-  const [file, setFile] = useState<File | null>(null);
-  const [options, setOptions] = useState<AskOptionsWithoutVoice | undefined>(undefined);
-  const [history, setHistory] = useState<Array<ChatMessage>>([]);
-
-  const { data, error, loading, complete } = useObservable<AiTranscribeAndAskResponse>(
-    () => {
-      if (!file) return of({} as AiTranscribeAndAskResponse);
-      return from(squid.ai().chatbot(integrationId).profile(profileId).transcribeAndAsk(file, options));
-    },
-    { initialData: {} as AiTranscribeAndAskResponse },
-    [file],
-  );
-
-  useEffect(() => {
-    if (!data.transcribedPrompt || loading) return;
-    setHistory((prev): Array<ChatMessage> => [
-      ...prev,
-      { id: generateId(), type: 'user', message: data.transcribedPrompt, voiceFile: file as File },
-      { id: generateId(), type: 'ai', message: data.responseString },
-    ]);
-    if (complete) setFile(null);
-  }, [data, complete, loading]);
-
-  const chat = (fileToTranscribe: File, askOptions?: AskOptionsWithoutVoice) => {
-    setFile(fileToTranscribe);
-    setOptions(askOptions);
-  };
-
-  return { chat, history, data, loading, error, complete };
-}
-
-export function useAiTranscribeAndAskWithVoiceResponse(integrationId: IntegrationId, profileId: string) {
-  const squid = useSquid();
-  const [file, setFile] = useState<File | null>(null);
-  const [options, setOptions] = useState<Omit<AiChatbotChatOptions, 'smoothTyping'> | undefined>(undefined);
-  const [history, setHistory] = useState<Array<ChatMessage>>([]);
-
-  const { data, error, loading, complete } = useObservable<TranscribeAndAskWithVoiceResponse>(
-    () => {
-      if (!file) return of({} as TranscribeAndAskWithVoiceResponse);
-      return from(squid.ai().chatbot(integrationId).profile(profileId).transcribeAndAskWithVoiceResponse(file, options));
-    },
-    { initialData: {} as TranscribeAndAskWithVoiceResponse },
-    [file],
-  );
-
-  useEffect(() => {
-    if (!data.transcribedPrompt || loading) return;
-    setHistory((prev): Array<ChatMessage> => [
-      ...prev,
-      { id: generateId(), type: 'user', message: data.transcribedPrompt, voiceFile: file as File },
-      { id: generateId(), type: 'ai', message: data.responseString, voiceFile: data.voiceResponseFile },
-    ]);
-    if (complete) setFile(null);
-  }, [data, complete, loading]);
-
-  const chat = (fileToTranscribe: File, voiceOptions?: Omit<AiChatbotChatOptions, 'smoothTyping'>) => {
-    setFile(fileToTranscribe);
-    setOptions(voiceOptions);
-  };
-
-  return { chat, history, data, loading, error, complete };
-}
-
-export function useAiAskWithVoiceResponse(integrationId: IntegrationId, profileId: string) {
-  const squid = useSquid();
-  const [prompt, setPrompt] = useState('');
-  const [options, setOptions] = useState<Omit<AiChatbotChatOptions, 'smoothTyping'> | undefined>(undefined);
-  const [history, setHistory] = useState<Array<ChatMessage>>([]);
-  const { data, error, loading, complete } = useObservable<AskWithVoiceResponse>(
-    () => {
-      if (!prompt) return of({} as AskWithVoiceResponse);
-      return from(squid.ai().chatbot(integrationId).profile(profileId).askWithVoiceResponse(prompt, options));
-    },
-    { initialData: {} as AskWithVoiceResponse },
-    [prompt],
-  );
-
-  useEffect(() => {
-    if (!prompt) return;
-    setHistory((prev): Array<ChatMessage> => [
-      ...prev,
-      { id: generateId(), type: 'user', message: prompt },
-    ]);
-  }, [prompt]);
-
-  useEffect(() => {
-    if (!data.responseString || loading) return;
-    setHistory((prev): Array<ChatMessage> => [
-      ...prev,
-      { id: generateId(), type: 'ai', message: data.responseString, voiceFile: data.voiceResponseFile },
-    ]);
-    if (complete) setPrompt('');
-  }, [data, complete, loading]);
-
-  const chat = (newPrompt: string, voiceOptions?: Omit<AiChatbotChatOptions, 'smoothTyping'>) => {
+  const chat = (newPrompt: string, chatOptions?: AiChatbotChatOptions) => {
     setPrompt(newPrompt);
-    setOptions(voiceOptions);
+    setOptions(chatOptions);
+    setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
   };
 
-  return { chat, history, data, loading, error, complete };
+  const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiChatbotChatOptions) => {
+    setFile(fileToTranscribe);
+    setOptions(transcribeOptions);
+  };
+
+  const chatWithVoiceResponse = (newPrompt: string, options?: Omit<AiChatbotChatOptions, 'smoothTyping'>) => {
+    setPrompt(newPrompt);
+    setOptions(options);
+    setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
+  };
+
+  const transcribeAndChatWithVoiceResponse = (
+    fileToTranscribe: File,
+    options?: Omit<AiChatbotChatOptions, 'smoothTyping'>,
+  ) => {
+    setFile(fileToTranscribe);
+    setOptions(options);
+  };
+
+  return {
+    chat,
+    transcribeAndChat,
+    chatWithVoiceResponse,
+    transcribeAndChatWithVoiceResponse,
+    history,
+    data,
+    loading,
+    error,
+    complete,
+  };
 }
