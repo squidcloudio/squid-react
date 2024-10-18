@@ -21,6 +21,33 @@ export type ChatMessage = {
   voiceFile?: File;
 };
 
+/**
+ * Custom hook for handling prompts to an AI agent.
+ * @param agentId
+ */
+export function useAiAgent(agentId: string): AiHookResponse {
+  return useAiHook(['ai_agents'], false, agentId);
+}
+
+/**
+ * Custom hook for making AI queries with a given database integration ID.
+ * @param integrationId - The unique identifier for the database integration instance.
+ * @returns An object containing methods and state for AI chat interactions.
+ */
+export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
+  return useAiHook([integrationId], true);
+}
+
+/**
+ * Custom hook for making AI queries with multiple database integration IDs.
+ * @param integrationIds - The unique identifiers for the database integrations.
+ * @returns An object containing methods and state for AI chat interactions.
+ */
+export function useAiQueryMulti(integrationIds: Array<IntegrationId>): AiHookResponse {
+  return useAiHook(integrationIds, true);
+}
+
+
 export interface AiHookResponse {
   /**
    * Method to initiate a chat with the AI.
@@ -77,24 +104,6 @@ export interface AiHookResponse {
    * Indicates whether the current operation is complete.
    */
   complete: boolean;
-}
-
-/**
- * Custom hook for making AI queries with a given database integration ID.
- * @param integrationId - The unique identifier for the database integration instance.
- * @returns An object containing methods and state for AI chat interactions.
- */
-export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
-  return useAiHook([integrationId], true);
-}
-
-/**
- * Custom hook for making AI queries with multiple database integration IDs.
- * @param integrationIds - The unique identifiers for the database integrations.
- * @returns An object containing methods and state for AI chat interactions.
- */
-export function useAiQueryMulti(integrationIds: Array<IntegrationId>): AiHookResponse {
-  return useAiHook(integrationIds, true);
 }
 
 export function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profileId?: string): AiHookResponse {
@@ -279,13 +288,4 @@ export function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profi
     error,
     complete,
   };
-}
-
-
-/**
- * Custom hook for handling prompts to an AI agent.
- * @param agentId
- */
-export function useAiAgent(agentId: string): AiHookResponse {
-  return useAiHook(['ai_agents'], false, agentId);
 }
