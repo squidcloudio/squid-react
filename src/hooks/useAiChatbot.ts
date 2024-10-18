@@ -101,6 +101,14 @@ export function useAiChatbot(integrationId: IntegrationId, profileId: string): A
   return useAiHook([integrationId], false, profileId);
 }
 
+/**
+ * Custom hook for handling prompts to an AI agent.
+ * @param agentId
+ */
+export function useAiAgent(agentId: string): AiHookResponse {
+  return useAiHook(['ai_agents'], false, agentId);
+}
+
 function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profileId?: string): AiHookResponse {
   const squid = useSquid();
   assertTruthy(!aiQuery || squid.options.apiKey, 'apiKey must be defined for AI queries');
