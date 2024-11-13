@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  AiAgentId,
   AiChatbotChatOptions,
   AskWithVoiceResponse,
   generateId,
@@ -25,12 +26,13 @@ export type ChatMessage = {
  * Custom hook for handling prompts to an AI agent.
  * @param agentId
  */
-export function useAiAgent(agentId: string): AiHookResponse {
+export function useAiAgent(agentId: AiAgentId): AiHookResponse {
   return useAiHook(['ai_agents'], false, agentId);
 }
 
 /**
  * Custom hook for making AI queries with a given database integration ID.
+ * @deprecated - Please import from `useAiAgent`
  * @param integrationId - The unique identifier for the database integration instance.
  * @returns An object containing methods and state for AI chat interactions.
  */
@@ -40,6 +42,7 @@ export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
 
 /**
  * Custom hook for making AI queries with multiple database integration IDs.
+ * @deprecated - Please import from `useAiAgent`
  * @param integrationIds - The unique identifiers for the database integrations.
  * @returns An object containing methods and state for AI chat interactions.
  */
