@@ -1,5 +1,6 @@
 'use client';
 
+export * from './useAiAgent';
 export * from './useAiChatbot';
 export * from './useCollection';
 export * from './useDoc';
