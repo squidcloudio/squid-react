@@ -149,6 +149,7 @@ export function useAiHook(
   const { data, error, loading, complete } = useObservable(
     () => {
       if (apiIntegration) {
+        if (!prompt) return of('');
         assertTruthy(integrationIds.length === 1, 'Must provide exactly one api integration.');
         return from(
           squid.ai().executeAiApiCall(integrationIds[0], prompt, allowedApiEndpoints, provideExplanationApiWithAi),
