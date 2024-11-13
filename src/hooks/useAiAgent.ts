@@ -38,6 +38,14 @@ export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
   return useAiHook([integrationId], true);
 }
 
+export function useAiOnApi(
+  integrationId: IntegrationId,
+  allowedApiEndpoints?: string[],
+  provideExplanationApiWithAi?: boolean,
+): AiHookResponse {
+  return useAiHook([integrationId], true, undefined, true, allowedApiEndpoints, provideExplanationApiWithAi);
+}
+
 /**
  * Custom hook for making AI queries with multiple database integration IDs.
  * @param integrationIds - The unique identifiers for the database integrations.
@@ -46,7 +54,6 @@ export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
 export function useAiQueryMulti(integrationIds: Array<IntegrationId>): AiHookResponse {
   return useAiHook(integrationIds, true);
 }
-
 
 export interface AiHookResponse {
   /**
@@ -106,7 +113,14 @@ export interface AiHookResponse {
   complete: boolean;
 }
 
-export function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profileId?: string): AiHookResponse {
+export function useAiHook(
+  integrationIds: Array<string>,
+  aiQuery: boolean,
+  profileId?: string,
+  apiIntegration = false,
+  allowedApiEndpoints?: string[],
+  provideExplanationApiWithAi?: boolean,
+): AiHookResponse {
   const squid = useSquid();
   assertTruthy(!aiQuery || squid.options.apiKey, 'apiKey must be defined for AI queries');
   const [file, setFile] = useState<File | null>(null);
@@ -118,6 +132,20 @@ export function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profi
     () => {
       if (aiQuery) {
         if (!prompt) return of('');
+        if (apiIntegration) {
+          return from(
+            squid.ai().executeAiApiCall(integrationIds[0], prompt, allowedApiEndpoints, provideExplanationApiWithAi),
+          ).pipe(
+            map((response) => {
+              let result = `### Result\n\n${response.answer}`;
+              if (response.explanation) {
+                result += `\n\n### Walkthrough\n\n${response.explanation}`;
+              }
+              setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: result }]);
+              return result;
+            }),
+          );
+        }
         return from(squid.ai().executeAiQueryMulti(integrationIds, prompt)).pipe(
           map((response) => {
             let result = `### Result\n\n${response.answer}`;
