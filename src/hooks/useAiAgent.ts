@@ -44,7 +44,7 @@ export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
  * Custom hook for making AI queries with a given API integration ID.
  * @param integrationId - The unique identifier for the API integration instance.
  * @param allowedApiEndpoints - Optional list of allowed endpoints the AI can use. If undefined, all endpoints can be used.
- * @param provideExplanationApiWithAi - Set to true to get an explanation of what the AI did. This will increase the AI takes to respond.
+ * @param provideExplanationApiWithAi - Set to true to get an explanation of what the AI did. This will increase the response time.
  */
 export function useAiOnApi(
   integrationId: IntegrationId,
@@ -127,7 +127,7 @@ export interface AiHookResponse {
  * @param integrationIds - List of integration ids to use in the hook
  * @param aiQuery - True if this is an AI query
  * @param profileId - Required if both aiQuery and apiIntegration params are false. ID of the profile.
- * @param apiIntegration - True if the integration passed in is an API integration (aiQuery is true)
+ * @param apiIntegration - True if the integration passed in is an API integration
  * @param allowedApiEndpoints - For an API integration, optional list of allowed endpoints (if not provided, then all endpoints can be used)
  * @param provideExplanationApiWithAi - For an API integration, set to true for an explanation of the steps the AI took
  */
