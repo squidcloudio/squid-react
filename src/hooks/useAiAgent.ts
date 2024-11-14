@@ -41,6 +41,20 @@ export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
 }
 
 /**
+ * Custom hook for making AI queries with a given API integration ID.
+ * @param integrationId - The unique identifier for the API integration instance.
+ * @param allowedApiEndpoints - Optional list of allowed endpoints the AI can use. If undefined, all endpoints can be used.
+ * @param provideExplanationApiWithAi - Set to true to get an explanation of what the AI did. This will increase the response time.
+ */
+export function useAiOnApi(
+  integrationId: IntegrationId,
+  allowedApiEndpoints?: string[],
+  provideExplanationApiWithAi?: boolean,
+): AiHookResponse {
+  return useAiHook([integrationId], true, undefined, true, allowedApiEndpoints, provideExplanationApiWithAi);
+}
+
+/**
  * Custom hook for making AI queries with multiple database integration IDs.
  * @deprecated - Please import from `useAiAgent`
  * @param integrationIds - The unique identifiers for the database integrations.
@@ -49,7 +63,6 @@ export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
 export function useAiQueryMulti(integrationIds: Array<IntegrationId>): AiHookResponse {
   return useAiHook(integrationIds, true);
 }
-
 
 export interface AiHookResponse {
   /**
@@ -109,7 +122,23 @@ export interface AiHookResponse {
   complete: boolean;
 }
 
-export function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profileId?: string): AiHookResponse {
+/**
+ *
+ * @param integrationIds - List of integration ids to use in the hook
+ * @param aiQuery - True if this is an AI query
+ * @param profileId - Required if both aiQuery and apiIntegration params are false. ID of the profile.
+ * @param apiIntegration - True if the integration passed in is an API integration
+ * @param allowedApiEndpoints - For an API integration, optional list of allowed endpoints (if not provided, then all endpoints can be used)
+ * @param provideExplanationApiWithAi - For an API integration, set to true for an explanation of the steps the AI took
+ */
+export function useAiHook(
+  integrationIds: Array<IntegrationId>,
+  aiQuery: boolean,
+  profileId?: string,
+  apiIntegration = false,
+  allowedApiEndpoints?: string[],
+  provideExplanationApiWithAi?: boolean,
+): AiHookResponse {
   const squid = useSquid();
   assertTruthy(!aiQuery || squid.options.apiKey, 'apiKey must be defined for AI queries');
   const [file, setFile] = useState<File | null>(null);
@@ -119,6 +148,22 @@ export function useAiHook(integrationIds: Array<string>, aiQuery: boolean, profi
 
   const { data, error, loading, complete } = useObservable(
     () => {
+      if (apiIntegration) {
+        if (!prompt) return of('');
+        assertTruthy(integrationIds.length === 1, 'Must provide exactly one api integration.');
+        return from(
+          squid.ai().executeAiApiCall(integrationIds[0], prompt, allowedApiEndpoints, provideExplanationApiWithAi),
+        ).pipe(
+          map((response) => {
+            let result = `### Result\n\n${response.answer}`;
+            if (response.explanation) {
+              result += `\n\n### Walkthrough\n\n${response.explanation}`;
+            }
+            setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: result }]);
+            return result;
+          }),
+        );
+      }
       if (aiQuery) {
         if (!prompt) return of('');
         return from(squid.ai().executeAiQueryMulti(integrationIds, prompt)).pipe(
