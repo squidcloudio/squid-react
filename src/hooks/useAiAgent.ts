@@ -186,7 +186,7 @@ export function useAiHook(
                   executedQuery.query
                 }\n\`\`\``;
                 if (executedQuery.rawResultsUrl) {
-                  result += `[View Raw Results](${executedQuery.rawResultsUrl})\n\n`;
+                  result += `\n[View Raw Results](${executedQuery.rawResultsUrl})\n\n`;
                 }
               }
             }
