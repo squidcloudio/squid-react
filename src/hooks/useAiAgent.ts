@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { from, map, mergeMap, of, tap } from 'rxjs';
 import { useObservable } from './useObservable';
 import { useSquid } from './useSquid';
+import { ExecuteAiQueryOptions } from '@squidcloud/client/dist/typescript-client/src/ai.types';
 
 export type ChatMessage = {
   id: string;
@@ -34,10 +35,11 @@ export function useAiAgent(agentId: AiAgentId): AiHookResponse {
  * Custom hook for making AI queries with a given database integration ID.
  * @deprecated - Please import from `useAiAgent`
  * @param integrationId - The unique identifier for the database integration instance.
+ * @param options - Optional configurations for the AI query.
  * @returns An object containing methods and state for AI chat interactions.
  */
-export function useAiQuery(integrationId: IntegrationId): AiHookResponse {
-  return useAiHook([integrationId], true);
+export function useAiQuery(integrationId: IntegrationId, options?: ExecuteAiQueryOptions): AiHookResponse {
+  return useAiHook([integrationId], true, undefined, undefined, undefined, undefined, options);
 }
 
 /**
@@ -58,10 +60,11 @@ export function useAiOnApi(
  * Custom hook for making AI queries with multiple database integration IDs.
  * @deprecated - Please import from `useAiAgent`
  * @param integrationIds - The unique identifiers for the database integrations.
+ * @param options - Optional configurations for the AI query.
  * @returns An object containing methods and state for AI chat interactions.
  */
-export function useAiQueryMulti(integrationIds: Array<IntegrationId>): AiHookResponse {
-  return useAiHook(integrationIds, true);
+export function useAiQueryMulti(integrationIds: Array<IntegrationId>, options?: ExecuteAiQueryOptions): AiHookResponse {
+  return useAiHook(integrationIds, true, undefined, undefined, undefined, undefined, options);
 }
 
 export interface AiHookResponse {
@@ -130,6 +133,7 @@ export interface AiHookResponse {
  * @param apiIntegration - True if the integration passed in is an API integration
  * @param allowedApiEndpoints - For an API integration, optional list of allowed endpoints (if not provided, then all endpoints can be used)
  * @param provideExplanationApiWithAi - For an API integration, set to true for an explanation of the steps the AI took
+ * @param aiQueryOptions - Options for the AI query
  */
 export function useAiHook(
   integrationIds: Array<IntegrationId>,
@@ -138,6 +142,7 @@ export function useAiHook(
   apiIntegration = false,
   allowedApiEndpoints?: string[],
   provideExplanationApiWithAi?: boolean,
+  aiQueryOptions?: ExecuteAiQueryOptions,
 ): AiHookResponse {
   const squid = useSquid();
   assertTruthy(!aiQuery || squid.options.apiKey, 'apiKey must be defined for AI queries');
@@ -166,7 +171,7 @@ export function useAiHook(
       }
       if (aiQuery) {
         if (!prompt) return of('');
-        return from(squid.ai().executeAiQueryMulti(integrationIds, prompt)).pipe(
+        return from(squid.ai().executeAiQueryMulti(integrationIds, prompt, aiQueryOptions)).pipe(
           map((response) => {
             let result = `### Result\n\n${response.answer}`;
             const numOfExecutesQueries = response.executedQueries.length;
