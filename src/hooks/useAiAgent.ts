@@ -185,6 +185,9 @@ export function useAiHook(
                 result += `\n\n${prefix}\n\n\`\`\`${executedQuery.markdownType || 'sql'}\n${
                   executedQuery.query
                 }\n\`\`\``;
+                if (executedQuery.rawResultsUrl) {
+                  result += `[View Raw Results](${executedQuery.rawResultsUrl})\n\n`;
+                }
               }
             }
             if (response.explanation) {
