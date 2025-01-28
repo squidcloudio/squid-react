@@ -174,6 +174,7 @@ export function useAiHook(
   assertTruthy(!aiQuery || squid.options.apiKey, 'apiKey must be defined for AI queries (via Squid)');
 
   const [file, setFile] = useState<File | null>(null);
+  const [requestCount, setRequestCount] = useState(0);
   const [prompt, setPrompt] = useState('');
   const [options, setOptions] = useState<AiChatbotChatOptions | undefined>(undefined);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
@@ -376,7 +377,7 @@ export function useAiHook(
       return of('');
     },
     { initialData: '' },
-    [file, prompt],
+    [file, prompt, requestCount],
   );
 
   // Clean up local states after completion
@@ -394,17 +395,20 @@ export function useAiHook(
     setPrompt(newPrompt);
     setOptions(chatOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
+    setRequestCount((count) => count + 1);
   };
 
   const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiChatbotChatOptions) => {
     setFile(fileToTranscribe);
     setOptions(transcribeOptions);
+    setRequestCount((count) => count + 1);
   };
 
   const chatWithVoiceResponse = (newPrompt: string, voiceOptions?: Omit<AiChatbotChatOptions, 'smoothTyping'>) => {
     setPrompt(newPrompt);
     setOptions(voiceOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
+    setRequestCount((count) => count + 1);
   };
 
   const transcribeAndChatWithVoiceResponse = (
@@ -413,6 +417,7 @@ export function useAiHook(
   ) => {
     setFile(fileToTranscribe);
     setOptions(voiceOptions);
+    setRequestCount((count) => count + 1);
   };
 
   return {
