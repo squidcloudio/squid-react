@@ -37,9 +37,9 @@ export interface ExtendedExecuteAiQueryOptions extends ExecuteAiQueryOptions {
   customApiUrl?: string;
 
   /**
-   * An optional apiKey you would like to send in the request header.
+   * An optional record of custom headers to send with the request.
    */
-  customApiKey?: string;
+  customApiHeaders?: Record<string, string>;
 }
 
 /**
@@ -191,9 +191,7 @@ export function useAiHook(
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              ...(aiQueryOptions.customApiKey
-                ? { Authorization: `Bearer ${aiQueryOptions.customApiKey}` }
-                : {}),
+              ...(aiQueryOptions.customApiHeaders || {}),
             },
             body: JSON.stringify({ prompt }),
           })
@@ -438,9 +436,9 @@ export function useAiHook(
  */
 interface UseAskWithApiOptions {
   /**
-   * If your custom API requires an auth token, you can pass it here.
+   * An optional record of custom headers to send with the request.
    */
-  apiKey?: string;
+  customHeaders?: Record<string, string>;
 }
 
 /**
@@ -464,7 +462,7 @@ export function useAskWithApi(apiUrl: string, options?: UseAskWithApiOptions): A
     undefined, // No explanation needed
     {
       customApiUrl: apiUrl,
-      customApiKey: options?.apiKey, // Pass along the apiKey if provided
+      customApiHeaders: options?.customHeaders,
     },
   );
 }
