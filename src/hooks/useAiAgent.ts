@@ -275,13 +275,12 @@ export function useAiHook(
        * 4) Default path: local Chatbot usage with a profile.
        */
       assertTruthy(profileId, 'profileId must be defined for chatbot usage');
-      const integrationId = integrationIds[0];
 
       // (a) Transcribe + Voice Response
       if (file) {
         if (options?.voiceOptions) {
           return from(
-            squid.ai().chatbot(integrationId).profile(profileId).transcribeAndAskWithVoiceResponse(file, options),
+            squid.ai().agent(profileId).transcribeAndAskWithVoiceResponse(file, options),
           ).pipe(
             map((response: TranscribeAndAskWithVoiceResponse) => {
               setHistory((prev) => [
@@ -301,7 +300,7 @@ export function useAiHook(
           // (b) Transcribe + Chat streaming
           const userMessageId = generateId();
           const aiMessageId = generateId();
-          return from(squid.ai().chatbot(integrationId).profile(profileId).transcribeAndChat(file, options)).pipe(
+          return from(squid.ai().agent(profileId).transcribeAndChat(file, options)).pipe(
             mergeMap((response: TranscribeAndChatResponse) => {
               setHistory((prev) => {
                 const prevCopy = [...prev];
@@ -333,7 +332,7 @@ export function useAiHook(
       // (c) Text + Voice Response
       else if (prompt) {
         if (options?.voiceOptions) {
-          return from(squid.ai().chatbot(integrationId).profile(profileId).askWithVoiceResponse(prompt, options)).pipe(
+          return from(squid.ai().agent(profileId).askWithVoiceResponse(prompt, options)).pipe(
             map((response: AskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -353,8 +352,7 @@ export function useAiHook(
           const id = generateId();
           return squid
             .ai()
-            .chatbot(integrationId)
-            .profile(profileId)
+            .agent(profileId)
             .chat(prompt, options)
             .pipe(
               tap((response) => {
