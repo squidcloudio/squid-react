@@ -1,8 +1,8 @@
 'use client';
 
 import {
+  AiAgentChatOptions,
   AiAgentId,
-  AiChatbotChatOptions,
   AskWithVoiceResponse,
   generateId,
   IntegrationId,
@@ -90,32 +90,32 @@ export interface AiHookResponse {
   /**
    * Method to initiate a chat with the AI.
    * @param {string} prompt - The input prompt to send to the AI.
-   * @param {AiChatbotChatOptions} [options] - Optional configurations for the chat.
+   * @param {AiAgentChatOptions} [options] - Optional configurations for the chat.
    */
-  chat: (prompt: string, options?: AiChatbotChatOptions) => void;
+  chat: (prompt: string, options?: AiAgentChatOptions) => void;
 
   /**
    * Method to transcribe an audio file and then chat with the AI.
    * @param {File} fileToTranscribe - The audio file to transcribe.
-   * @param {AiChatbotChatOptions} [options] - Optional configurations for the chat.
+   * @param {AiAgentChatOptions} [options] - Optional configurations for the chat.
    */
-  transcribeAndChat: (fileToTranscribe: File, options?: AiChatbotChatOptions) => void;
+  transcribeAndChat: (fileToTranscribe: File, options?: AiAgentChatOptions) => void;
 
   /**
    * Method to initiate a chat with the AI and receive a voice response.
    * @param {string} prompt - The input prompt to send to the AI.
-   * @param {Omit<AiChatbotChatOptions, 'smoothTyping'>} [options] - Optional configurations for the chat.
+   * @param {Omit<AiAgentChatOptions, 'smoothTyping'>} [options] - Optional configurations for the chat.
    */
-  chatWithVoiceResponse: (prompt: string, options?: Omit<AiChatbotChatOptions, 'smoothTyping'>) => void;
+  chatWithVoiceResponse: (prompt: string, options?: Omit<AiAgentChatOptions, 'smoothTyping'>) => void;
 
   /**
    * Method to transcribe an audio file, chat with the AI, and receive a voice response.
    * @param {File} fileToTranscribe - The audio file to transcribe.
-   * @param {Omit<AiChatbotChatOptions, 'smoothTyping'>} [options] - Optional configurations for the chat.
+   * @param {Omit<AiAgentChatOptions, 'smoothTyping'>} [options] - Optional configurations for the chat.
    */
   transcribeAndChatWithVoiceResponse: (
     fileToTranscribe: File,
-    options?: Omit<AiChatbotChatOptions, 'smoothTyping'>,
+    options?: Omit<AiAgentChatOptions, 'smoothTyping'>,
   ) => void;
 
   /**
@@ -176,7 +176,7 @@ export function useAiHook(
   const [file, setFile] = useState<File | null>(null);
   const [requestCount, setRequestCount] = useState(0);
   const [prompt, setPrompt] = useState('');
-  const [options, setOptions] = useState<AiChatbotChatOptions | undefined>(undefined);
+  const [options, setOptions] = useState<AiAgentChatOptions | undefined>(undefined);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
 
   const { data, error, loading, complete } = useObservable(
@@ -387,20 +387,20 @@ export function useAiHook(
   /**
    * Methods exposed to the user of the hook.
    */
-  const chat = (newPrompt: string, chatOptions?: AiChatbotChatOptions) => {
+  const chat = (newPrompt: string, chatOptions?: AiAgentChatOptions) => {
     setPrompt(newPrompt);
     setOptions(chatOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
     setRequestCount((count) => count + 1);
   };
 
-  const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiChatbotChatOptions) => {
+  const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiAgentChatOptions) => {
     setFile(fileToTranscribe);
     setOptions(transcribeOptions);
     setRequestCount((count) => count + 1);
   };
 
-  const chatWithVoiceResponse = (newPrompt: string, voiceOptions?: Omit<AiChatbotChatOptions, 'smoothTyping'>) => {
+  const chatWithVoiceResponse = (newPrompt: string, voiceOptions?: Omit<AiAgentChatOptions, 'smoothTyping'>) => {
     setPrompt(newPrompt);
     setOptions(voiceOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
@@ -409,7 +409,7 @@ export function useAiHook(
 
   const transcribeAndChatWithVoiceResponse = (
     fileToTranscribe: File,
-    voiceOptions?: Omit<AiChatbotChatOptions, 'smoothTyping'>,
+    voiceOptions?: Omit<AiAgentChatOptions, 'smoothTyping'>,
   ) => {
     setFile(fileToTranscribe);
     setOptions(voiceOptions);
