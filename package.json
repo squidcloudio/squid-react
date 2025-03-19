@@ -1,6 +1,6 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.86",
+  "version": "1.0.87",
   "description": "Squid React SDK",
   "types": "dist/cjs/index.d.ts",
   "main": "dist/cjs/index.js",
@@ -27,7 +27,7 @@
     "rxjs": ">=7.5.7 <8.0.0"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.335",
+    "@squidcloud/client": "^1.0.336",
     "assertic": "^1.0.0"
   },
   "devDependencies": {
@@ -35,7 +35,6 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-terser": "^0.4.0",
-    "@types/node": "^18.14.4",
     "@types/react": "^18.0.28",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",

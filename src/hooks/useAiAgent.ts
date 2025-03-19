@@ -30,9 +30,9 @@ export type ChatMessage = {
 export interface ExtendedExecuteAiQueryOptions extends ExecuteAiQueryOptions {
   /**
    * A custom API endpoint that expects:
-   *   POST { prompt: string }
+   *   `POST { prompt: string }`
    * and returns:
-   *   { response: string } or { error: string }
+   *   `{ response: string }` or `{ error: string }`
    */
   customApiUrl?: string;
 

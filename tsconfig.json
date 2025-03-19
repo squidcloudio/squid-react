@@ -23,10 +23,14 @@
     "noFallthroughCasesInSwitch": true,
     "downlevelIteration": true,
     "importHelpers": true,
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
