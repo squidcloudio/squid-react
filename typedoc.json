@@ -1,0 +1,42 @@
+{
+  "entryPoints": [
+    "./src/index.ts"
+  ],
+  "sortEntryPoints": false,
+  "alwaysCreateEntryPointModule": false,
+  "entryPointStrategy": "expand",
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": false,
+    "excludeReferences": false,
+    "includeFolders": false,
+    "compactFolders": true
+  },
+  "categorizeByGroup": false,
+  "categoryOrder": [
+    "Squid",
+    "*"
+  ],
+  "groupOrder": [
+    "Functions",
+    "*"
+  ],
+  "sort": ["kind", "alphabetical"],
+  "kindSortOrder": [
+    "Function"
+  ],
+  "defaultCategory": "Other",
+  "tsconfig": "./tsconfig.json",
+  "excludeExternals": true,
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "disableSources": true,
+  "markdownItOptions": {
+    "html": true,
+    "linkify": true
+  },
+  "exclude": [
+    "**/node_modules/**/*"
+  ],
+  "out": "./generated-docs/html"
+}

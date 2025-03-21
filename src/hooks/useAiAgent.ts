@@ -52,7 +52,6 @@ export function useAiAgent(agentId: AiAgentId): AiHookResponse {
 
 /**
  * Custom hook for making AI queries with a given database integration ID.
- * @deprecated - Please import from `useAiAgent`
  * @param integrationId - The unique identifier for the database integration instance.
  * @param options - Optional configurations for the AI query.
  * @returns An object containing methods and state for AI chat interactions.
@@ -77,7 +76,6 @@ export function useAiOnApi(
 
 /**
  * Custom hook for making AI queries with multiple database integration IDs.
- * @deprecated - Please import from `useAiAgent`
  * @param integrationIds - The unique identifiers for the database integrations.
  * @param options - Optional configurations for the AI query.
  * @returns An object containing methods and state for AI chat interactions.
@@ -256,7 +254,9 @@ export function useAiHook(
                   result += `\n\n### Executed Queries\n\n`;
                 }
                 const prefix = numOfExecutesQueries > 1 ? `#### Query ${i + 1}` : '### Executed Query';
-                result += `\n\n${prefix}\n\n\`\`\`${executedQuery.markdownType || 'sql'}\n${executedQuery.query}\n\`\`\``;
+                result += `\n\n${prefix}\n\n\`\`\`${executedQuery.markdownType || 'sql'}\n${
+                  executedQuery.query
+                }\n\`\`\``;
                 if (executedQuery.rawResultsUrl) {
                   result += `\n[View Raw Results](${executedQuery.rawResultsUrl})\n\n`;
                 }
@@ -279,9 +279,7 @@ export function useAiHook(
       // (a) Transcribe + Voice Response
       if (file) {
         if (options?.voiceOptions) {
-          return from(
-            squid.ai().agent(profileId).transcribeAndAskWithVoiceResponse(file, options),
-          ).pipe(
+          return from(squid.ai().agent(profileId).transcribeAndAskWithVoiceResponse(file, options)).pipe(
             map((response: TranscribeAndAskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -432,7 +430,7 @@ export function useAiHook(
 /**
  * Optional parameters for `useAskWithApi`.
  */
-interface UseAskWithApiOptions {
+export interface UseAskWithApiOptions {
   /**
    * An optional record of custom headers to send with the request.
    */

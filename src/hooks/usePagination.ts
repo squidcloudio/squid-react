@@ -23,7 +23,7 @@ export type PaginationType<T> = {
   prev: () => void;
 };
 
-interface PaginationOptions extends SquidPaginationOptions {
+export interface PaginationOptions extends SquidPaginationOptions {
   /**
    * Determines whether to execute the pagination query automatically. Defaults to `true`. When set to `false`,
    * executing the query will be delayed until `enabled` is set to `true`.

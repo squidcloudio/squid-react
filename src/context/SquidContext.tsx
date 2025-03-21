@@ -13,7 +13,7 @@ export const SquidContext = React.createContext<SquidContextType>({
   squid: null,
 });
 
-type SquidContextProps = {
+export type SquidContextProps = {
   children: React.ReactNode;
   options: SquidOptions;
 };

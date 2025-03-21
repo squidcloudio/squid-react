@@ -1,6 +1,6 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.87",
+  "version": "1.0.88",
   "description": "Squid React SDK",
   "types": "dist/cjs/index.d.ts",
   "main": "dist/cjs/index.js",
@@ -11,7 +11,9 @@
     "clean": "rimraf node_modules dist",
     "update": "ncu @squidcloud/client -u",
     "publish:public": "npm run build && bash ./publish.sh",
-    "publish:beta": "npm run build && bash ./publish.sh beta"
+    "publish:beta": "npm run build && bash ./publish.sh beta",
+    "generate-docs-html": "typedoc",
+    "generate-docs-markdown": "typedoc --plugin typedoc-plugin-markdown --readme none --out ./generated-docs/markdown"
   },
   "files": [
     "dist/**/*"
@@ -55,6 +57,8 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-preserve-directives": "^0.2.0",
     "rollup-plugin-typescript2": "^0.34.1",
-    "yalc": "^1.0.0-pre.53"
+    "yalc": "^1.0.0-pre.53",
+    "typedoc": "^0.28.0",
+    "typedoc-plugin-markdown": "^4.5.2"
   }
 }

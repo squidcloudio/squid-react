@@ -59,3 +59,4 @@ terraform.tfstate.backup
 
 # NPM
 .npmrc
+generated-docs
