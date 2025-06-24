@@ -148,11 +148,11 @@ export interface AiHookResponse {
  * 1. Custom API (using customApiUrl/customApiKey).
  * 2. API Integration (when `apiIntegration` is true).
  * 3. AI Query (when `aiQuery` is true).
- * 4. Chatbot transcription or chat with a local agent (default path).
+ * 4. Chat transcription or chat with a local agent (default path).
  *
  * @param integrationIds - List of integration IDs to use in the hook.
  * @param aiQuery - True if this is an AI query.
- * @param profileId - Required if both aiQuery and apiIntegration are false.
+ * @param agentId - Required if both aiQuery and apiIntegration are false.
  * @param apiIntegration - True if the integration passed in is an API integration.
  * @param allowedApiEndpoints - For an API integration, optional list of allowed endpoints.
  * @param provideExplanationApiWithAi - For an API integration, set to true for an explanation.
@@ -161,7 +161,7 @@ export interface AiHookResponse {
 export function useAiHook(
   integrationIds: Array<IntegrationId>,
   aiQuery: boolean,
-  profileId?: string,
+  agentId?: string,
   apiIntegration = false,
   allowedApiEndpoints?: string[],
   provideExplanationApiWithAi?: boolean,
@@ -272,14 +272,14 @@ export function useAiHook(
       }
 
       /**
-       * 4) Default path: local Chatbot usage with a profile.
+       * 4) Default path: local chat usage with an agent.
        */
-      assertTruthy(profileId, 'profileId must be defined for chatbot usage');
+      assertTruthy(agentId, 'agentId must be defined for chat usage');
 
       // (a) Transcribe + Voice Response
       if (file) {
         if (options?.voiceOptions) {
-          return from(squid.ai().agent(profileId).transcribeAndAskWithVoiceResponse(file, options)).pipe(
+          return from(squid.ai().agent(agentId).transcribeAndAskWithVoiceResponse(file, options)).pipe(
             map((response: TranscribeAndAskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -298,7 +298,7 @@ export function useAiHook(
           // (b) Transcribe + Chat streaming
           const userMessageId = generateId();
           const aiMessageId = generateId();
-          return from(squid.ai().agent(profileId).transcribeAndChat(file, options)).pipe(
+          return from(squid.ai().agent(agentId).transcribeAndChat(file, options)).pipe(
             mergeMap((response: TranscribeAndChatResponse) => {
               setHistory((prev) => {
                 const prevCopy = [...prev];
@@ -330,7 +330,7 @@ export function useAiHook(
       // (c) Text + Voice Response
       else if (prompt) {
         if (options?.voiceOptions) {
-          return from(squid.ai().agent(profileId).askWithVoiceResponse(prompt, options)).pipe(
+          return from(squid.ai().agent(agentId).askWithVoiceResponse(prompt, options)).pipe(
             map((response: AskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -350,7 +350,7 @@ export function useAiHook(
           const id = generateId();
           return squid
             .ai()
-            .agent(profileId)
+            .agent(agentId)
             .chat(prompt, options)
             .pipe(
               tap((response) => {
@@ -452,7 +452,7 @@ export function useAskWithApi(apiUrl: string, options?: UseAskWithApiOptions): A
   return useAiHook(
     [], // No integration IDs needed for a custom API
     false, // Not an AI query on databases
-    undefined, // No profile ID needed
+    undefined, // No agent ID needed
     false, // Not a Squid-based API integration
     undefined, // No allowed endpoints needed
     undefined, // No explanation needed
