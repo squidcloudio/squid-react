@@ -215,15 +215,14 @@ export function useAiHook(
               }
               return res.text();
             })
-            .then(async (jsonString) => {
+            .then(async (aiResponse) => {
               let answer: string | undefined;
-              if (!jsonString) {
+              if (!aiResponse) {
                 assertTruthy(jobId, 'jobId must be defined when using customApiUrl');
-                const json = await squid.job().awaitJob<{ response: string }>(jobId);
-                answer = json.response;
+                answer = await squid.job().awaitJob<string>(jobId);
               } else {
                 // The API is expected to return { response: string } or { error: string }
-                const json = JSON.parse(jsonString);
+                const json = JSON.parse(aiResponse);
                 answer = json?.response;
               }
               const finalAnswer = answer ?? '';
