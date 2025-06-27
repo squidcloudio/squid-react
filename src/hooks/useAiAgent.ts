@@ -38,9 +38,6 @@ export interface CustomApiOptions {
    */
   customApiUrl?: string;
 
-  /** An optional jobId to send to the custom API endpoint */
-  customApiJobId?: JobId;
-
   /**
    * An optional record of custom headers to send with the request.
    */
@@ -181,6 +178,7 @@ export function useAiHook(
   const [file, setFile] = useState<File | null>(null);
   const [requestCount, setRequestCount] = useState(0);
   const [prompt, setPrompt] = useState('');
+  const [jobId, setJobId] = useState<JobId | undefined>(undefined);
   const [options, setOptions] = useState<AiChatOptions<any> | undefined>(undefined);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
 
@@ -198,7 +196,7 @@ export function useAiHook(
               'Content-Type': 'application/json',
               ...(customApiOptions.customApiHeaders || {}),
             },
-            body: JSON.stringify({ prompt, jobId: customApiOptions.customApiJobId }),
+            body: JSON.stringify({ prompt, jobId }),
           })
             .then(async (res) => {
               // Handle non-200 responses
@@ -286,7 +284,7 @@ export function useAiHook(
       // (a) Transcribe + Voice Response
       if (file) {
         if (options?.voiceOptions) {
-          return from(squid.ai().agent(profileId).transcribeAndAskWithVoiceResponse(file, options as AiAskOptionsWithVoice<any>)).pipe(
+          return from(squid.ai().agent(profileId).transcribeAndAskWithVoiceResponse(file, options as AiAskOptionsWithVoice<any>, jobId)).pipe(
             map((response: TranscribeAndAskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -305,7 +303,7 @@ export function useAiHook(
           // (b) Transcribe + Chat streaming
           const userMessageId = generateId();
           const aiMessageId = generateId();
-          return from(squid.ai().agent(profileId).transcribeAndChat(file, options as AiChatOptionsWithoutVoice)).pipe(
+          return from(squid.ai().agent(profileId).transcribeAndChat(file, options as AiChatOptionsWithoutVoice, jobId)).pipe(
             mergeMap((response: TranscribeAndChatResponse) => {
               setHistory((prev) => {
                 const prevCopy = [...prev];
@@ -337,7 +335,7 @@ export function useAiHook(
       // (c) Text + Voice Response
       else if (prompt) {
         if (options?.voiceOptions) {
-          return from(squid.ai().agent(profileId).askWithVoiceResponse(prompt, options as AiAskOptionsWithVoice<any>)).pipe(
+          return from(squid.ai().agent(profileId).askWithVoiceResponse(prompt, options as AiAskOptionsWithVoice<any>, jobId)).pipe(
             map((response: AskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -358,7 +356,7 @@ export function useAiHook(
           return squid
             .ai()
             .agent(profileId)
-            .chat(prompt, options as AiChatOptionsWithoutVoice)
+            .chat(prompt, options as AiChatOptionsWithoutVoice, jobId)
             .pipe(
               tap((response) => {
                 setHistory((prev) => {
@@ -386,26 +384,30 @@ export function useAiHook(
     if (complete) {
       setFile(null);
       setPrompt('');
+      setJobId(undefined);
     }
   }, [complete]);
 
   /**
    * Methods exposed to the user of the hook.
    */
-  const chat = (newPrompt: string, chatOptions?: AiChatOptions) => {
+  const chat = (newPrompt: string, chatOptions?: AiChatOptions, jobId?: JobId) => {
+    setJobId(jobId);
     setPrompt(newPrompt);
     setOptions(chatOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
     setRequestCount((count) => count + 1);
   };
 
-  const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiChatOptions) => {
+  const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiChatOptions, jobId?: JobId) => {
+    setJobId(jobId);
     setFile(fileToTranscribe);
     setOptions(transcribeOptions);
     setRequestCount((count) => count + 1);
   };
 
-  const chatWithVoiceResponse = (newPrompt: string, voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>) => {
+  const chatWithVoiceResponse = (newPrompt: string, voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>, jobId?: JobId) => {
+    setJobId(jobId);
     setPrompt(newPrompt);
     setOptions(voiceOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
@@ -415,7 +417,9 @@ export function useAiHook(
   const transcribeAndChatWithVoiceResponse = (
     fileToTranscribe: File,
     voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>,
+    jobId?: JobId,
   ) => {
+    setJobId(jobId);
     setFile(fileToTranscribe);
     setOptions(voiceOptions);
     setRequestCount((count) => count + 1);
