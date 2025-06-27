@@ -92,21 +92,21 @@ export interface AiHookResponse {
    * @param prompt - The input prompt to send to the AI.
    * @param options - Optional configurations for the chat.
    */
-  chat: (prompt: string, options?: AiChatOptions) => void;
+  chat: (prompt: string, options?: AiChatOptions, jobId?: JobId) => void;
 
   /**
    * Method to transcribe an audio file and then chat with the AI.
    * @param fileToTranscribe - The audio file to transcribe.
    * @param options - Optional configurations for the chat.
    */
-  transcribeAndChat: (fileToTranscribe: File, options?: AiChatOptions) => void;
+  transcribeAndChat: (fileToTranscribe: File, options?: AiChatOptions, jobId?: JobId) => void;
 
   /**
    * Method to initiate a chat with the AI and receive a voice response.
    * @param prompt - The input prompt to send to the AI.
    * @param options - Optional configurations for the chat.
    */
-  chatWithVoiceResponse: (prompt: string, options?: Omit<AiChatOptions, 'smoothTyping'>) => void;
+  chatWithVoiceResponse: (prompt: string, options?: Omit<AiChatOptions, 'smoothTyping'>, jobId?: JobId) => void;
 
   /**
    * Method to transcribe an audio file, chat with the AI, and receive a voice response.
@@ -116,6 +116,7 @@ export interface AiHookResponse {
   transcribeAndChatWithVoiceResponse: (
     fileToTranscribe: File,
     options?: Omit<AiChatOptions, 'smoothTyping'>,
+    jobId?: JobId
   ) => void;
 
   /**
