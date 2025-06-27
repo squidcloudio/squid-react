@@ -116,7 +116,7 @@ export interface AiHookResponse {
   transcribeAndChatWithVoiceResponse: (
     fileToTranscribe: File,
     options?: Omit<AiChatOptions, 'smoothTyping'>,
-    jobId?: JobId
+    jobId?: JobId,
   ) => void;
 
   /**
@@ -213,13 +213,22 @@ export function useAiHook(
                 }
                 throw new Error(errorMessage);
               }
-              return res.json();
+              return res.text();
             })
-            .then((json) => {
-              // The API is expected to return { response: string } or { error: string }
-              const answer = json?.response ?? '';
-              setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: answer }]);
-              return answer;
+            .then(async (jsonString) => {
+              let answer: string | undefined;
+              if (!jsonString) {
+                assertTruthy(jobId, 'jobId must be defined when using customApiUrl');
+                const json = await squid.job().awaitJob<{ response: string }>(jobId);
+                answer = json.response;
+              } else {
+                // The API is expected to return { response: string } or { error: string }
+                const json = JSON.parse(jsonString);
+                answer = json?.response;
+              }
+              const finalAnswer = answer ?? '';
+              setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: finalAnswer }]);
+              return finalAnswer;
             }),
         );
       }
