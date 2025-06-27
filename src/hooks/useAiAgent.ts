@@ -1,11 +1,13 @@
 'use client';
 
 import {
-  AiAgentChatOptions,
   AiAgentId,
+  AiChatOptions,
+  AiChatOptionsWithoutVoice,
   AskWithVoiceResponse,
   generateId,
   IntegrationId,
+  JobId,
   TranscribeAndAskWithVoiceResponse,
   TranscribeAndChatResponse,
 } from '@squidcloud/client';
@@ -15,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { from, map, mergeMap, of, tap } from 'rxjs';
 import { useObservable } from './useObservable';
 import { useSquid } from './useSquid';
+import { AiAskOptionsWithVoice } from '@squidcloud/client/dist/typescript-client/src/agent/ai-agent-client.types';
 
 export type ChatMessage = {
   id: string;
@@ -24,17 +27,19 @@ export type ChatMessage = {
 };
 
 /**
- * Extend the original ExecuteAiQueryOptions to include customApiUrl and customApiKey
- * for the useAskWithApi scenario.
+ * Custom API options for the AI agent.
  */
-export interface ExtendedExecuteAiQueryOptions extends ExecuteAiQueryOptions {
+export interface CustomApiOptions {
   /**
    * A custom API endpoint that expects:
-   *   `POST { prompt: string }`
+   *   `POST { prompt: string, jobId?: JobId }`
    * and returns:
-   *   `{ response: string }` or `{ error: string }`
+   *   `{ response?: string }` or `{ error: string }`
    */
   customApiUrl?: string;
+
+  /** An optional jobId to send to the custom API endpoint */
+  customApiJobId?: JobId;
 
   /**
    * An optional record of custom headers to send with the request.
@@ -87,33 +92,33 @@ export function useAiQueryMulti(integrationIds: Array<IntegrationId>, options?: 
 export interface AiHookResponse {
   /**
    * Method to initiate a chat with the AI.
-   * @param {string} prompt - The input prompt to send to the AI.
-   * @param {AiAgentChatOptions} [options] - Optional configurations for the chat.
+   * @param prompt - The input prompt to send to the AI.
+   * @param options - Optional configurations for the chat.
    */
-  chat: (prompt: string, options?: AiAgentChatOptions) => void;
+  chat: (prompt: string, options?: AiChatOptions) => void;
 
   /**
    * Method to transcribe an audio file and then chat with the AI.
-   * @param {File} fileToTranscribe - The audio file to transcribe.
-   * @param {AiAgentChatOptions} [options] - Optional configurations for the chat.
+   * @param fileToTranscribe - The audio file to transcribe.
+   * @param options - Optional configurations for the chat.
    */
-  transcribeAndChat: (fileToTranscribe: File, options?: AiAgentChatOptions) => void;
+  transcribeAndChat: (fileToTranscribe: File, options?: AiChatOptions) => void;
 
   /**
    * Method to initiate a chat with the AI and receive a voice response.
-   * @param {string} prompt - The input prompt to send to the AI.
-   * @param {Omit<AiAgentChatOptions, 'smoothTyping'>} [options] - Optional configurations for the chat.
+   * @param prompt - The input prompt to send to the AI.
+   * @param options - Optional configurations for the chat.
    */
-  chatWithVoiceResponse: (prompt: string, options?: Omit<AiAgentChatOptions, 'smoothTyping'>) => void;
+  chatWithVoiceResponse: (prompt: string, options?: Omit<AiChatOptions, 'smoothTyping'>) => void;
 
   /**
    * Method to transcribe an audio file, chat with the AI, and receive a voice response.
-   * @param {File} fileToTranscribe - The audio file to transcribe.
-   * @param {Omit<AiAgentChatOptions, 'smoothTyping'>} [options] - Optional configurations for the chat.
+   * @param fileToTranscribe - The audio file to transcribe.
+   * @param options - Optional configurations for the chat.
    */
   transcribeAndChatWithVoiceResponse: (
     fileToTranscribe: File,
-    options?: Omit<AiAgentChatOptions, 'smoothTyping'>,
+    options?: Omit<AiChatOptions, 'smoothTyping'>,
   ) => void;
 
   /**
@@ -157,6 +162,7 @@ export interface AiHookResponse {
  * @param allowedApiEndpoints - For an API integration, optional list of allowed endpoints.
  * @param provideExplanationApiWithAi - For an API integration, set to true for an explanation.
  * @param aiQueryOptions - Options for the AI query (may include `customApiUrl`, `customApiKey`).
+ * @param customApiOptions - Optional custom API options for the AI agent, such as `customApiUrl`, `customApiJobId`, and `customApiHeaders`.
  */
 export function useAiHook(
   integrationIds: Array<IntegrationId>,
@@ -165,7 +171,8 @@ export function useAiHook(
   apiIntegration = false,
   allowedApiEndpoints?: string[],
   provideExplanationApiWithAi?: boolean,
-  aiQueryOptions?: ExtendedExecuteAiQueryOptions,
+  aiQueryOptions?: ExecuteAiQueryOptions,
+  customApiOptions?: CustomApiOptions,
 ): AiHookResponse {
   const squid = useSquid();
   // If it's an AI query or API integration, we rely on the Squid API key.
@@ -174,7 +181,7 @@ export function useAiHook(
   const [file, setFile] = useState<File | null>(null);
   const [requestCount, setRequestCount] = useState(0);
   const [prompt, setPrompt] = useState('');
-  const [options, setOptions] = useState<AiAgentChatOptions | undefined>(undefined);
+  const [options, setOptions] = useState<AiChatOptions<any> | undefined>(undefined);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
 
   const { data, error, loading, complete } = useObservable(
@@ -182,16 +189,16 @@ export function useAiHook(
       /**
        * 1) Check if we have a customApiUrl in aiQueryOptions. If so, do a manual fetch.
        */
-      if (aiQueryOptions?.customApiUrl) {
+      if (customApiOptions?.customApiUrl) {
         if (!prompt) return of('');
         return from(
-          fetch(aiQueryOptions.customApiUrl, {
+          fetch(customApiOptions.customApiUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              ...(aiQueryOptions.customApiHeaders || {}),
+              ...(customApiOptions.customApiHeaders || {}),
             },
-            body: JSON.stringify({ prompt }),
+            body: JSON.stringify({ prompt, jobId: customApiOptions.customApiJobId }),
           })
             .then(async (res) => {
               // Handle non-200 responses
@@ -279,7 +286,7 @@ export function useAiHook(
       // (a) Transcribe + Voice Response
       if (file) {
         if (options?.voiceOptions) {
-          return from(squid.ai().agent(profileId).transcribeAndAskWithVoiceResponse(file, options)).pipe(
+          return from(squid.ai().agent(profileId).transcribeAndAskWithVoiceResponse(file, options as AiAskOptionsWithVoice<any>)).pipe(
             map((response: TranscribeAndAskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -298,7 +305,7 @@ export function useAiHook(
           // (b) Transcribe + Chat streaming
           const userMessageId = generateId();
           const aiMessageId = generateId();
-          return from(squid.ai().agent(profileId).transcribeAndChat(file, options)).pipe(
+          return from(squid.ai().agent(profileId).transcribeAndChat(file, options as AiChatOptionsWithoutVoice)).pipe(
             mergeMap((response: TranscribeAndChatResponse) => {
               setHistory((prev) => {
                 const prevCopy = [...prev];
@@ -330,7 +337,7 @@ export function useAiHook(
       // (c) Text + Voice Response
       else if (prompt) {
         if (options?.voiceOptions) {
-          return from(squid.ai().agent(profileId).askWithVoiceResponse(prompt, options)).pipe(
+          return from(squid.ai().agent(profileId).askWithVoiceResponse(prompt, options as AiAskOptionsWithVoice<any>)).pipe(
             map((response: AskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -351,7 +358,7 @@ export function useAiHook(
           return squid
             .ai()
             .agent(profileId)
-            .chat(prompt, options)
+            .chat(prompt, options as AiChatOptionsWithoutVoice)
             .pipe(
               tap((response) => {
                 setHistory((prev) => {
@@ -385,20 +392,20 @@ export function useAiHook(
   /**
    * Methods exposed to the user of the hook.
    */
-  const chat = (newPrompt: string, chatOptions?: AiAgentChatOptions) => {
+  const chat = (newPrompt: string, chatOptions?: AiChatOptions) => {
     setPrompt(newPrompt);
     setOptions(chatOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
     setRequestCount((count) => count + 1);
   };
 
-  const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiAgentChatOptions) => {
+  const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiChatOptions) => {
     setFile(fileToTranscribe);
     setOptions(transcribeOptions);
     setRequestCount((count) => count + 1);
   };
 
-  const chatWithVoiceResponse = (newPrompt: string, voiceOptions?: Omit<AiAgentChatOptions, 'smoothTyping'>) => {
+  const chatWithVoiceResponse = (newPrompt: string, voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>) => {
     setPrompt(newPrompt);
     setOptions(voiceOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
@@ -407,7 +414,7 @@ export function useAiHook(
 
   const transcribeAndChatWithVoiceResponse = (
     fileToTranscribe: File,
-    voiceOptions?: Omit<AiAgentChatOptions, 'smoothTyping'>,
+    voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>,
   ) => {
     setFile(fileToTranscribe);
     setOptions(voiceOptions);
@@ -428,27 +435,16 @@ export function useAiHook(
 }
 
 /**
- * Optional parameters for `useAskWithApi`.
- */
-export interface UseAskWithApiOptions {
-  /**
-   * An optional record of custom headers to send with the request.
-   */
-  customHeaders?: Record<string, string>;
-}
-
-/**
  * A convenient hook for simply passing a prompt to a custom API endpoint
  * that expects a JSON body `{ prompt: string }` and can return `{ response: string }`
  * or an error in `{ error: string }`.
  *
  * You can optionally provide an `apiKey` if needed by your endpoint.
  *
- * @param apiUrl - The endpoint to which the POST request will be sent.
- * @param options - Additional options (e.g. an apiKey).
+ * @param options - The custom API options.
  * @returns {AiHookResponse}
  */
-export function useAskWithApi(apiUrl: string, options?: UseAskWithApiOptions): AiHookResponse {
+export function useAskWithApi(options: CustomApiOptions): AiHookResponse {
   return useAiHook(
     [], // No integration IDs needed for a custom API
     false, // Not an AI query on databases
@@ -456,9 +452,7 @@ export function useAskWithApi(apiUrl: string, options?: UseAskWithApiOptions): A
     false, // Not a Squid-based API integration
     undefined, // No allowed endpoints needed
     undefined, // No explanation needed
-    {
-      customApiUrl: apiUrl,
-      customApiHeaders: options?.customHeaders,
-    },
+    undefined, // No AI query options needed
+    options,
   );
 }
