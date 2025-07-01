@@ -259,6 +259,9 @@ export function useAiHook(
         if (!prompt) return of('');
         return from(squid.ai().executeAiQueryMulti(integrationIds, prompt, aiQueryOptions)).pipe(
           map((response) => {
+            if (!response.success) {
+              throw new Error(response.answer);
+            }
             let result = `### Result\n\n${response.answer}`;
             const numOfExecutesQueries = response.executedQueries.length;
             if (numOfExecutesQueries) {
