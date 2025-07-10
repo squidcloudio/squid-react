@@ -4,6 +4,7 @@ import {
   AiAgentId,
   AiChatOptions,
   AiChatOptionsWithoutVoice,
+  AiStatusMessage,
   AskWithVoiceResponse,
   generateId,
   IntegrationId,
@@ -19,12 +20,24 @@ import { useObservable } from './useObservable';
 import { useSquid } from './useSquid';
 import { AiAskOptionsWithVoice } from '@squidcloud/client/dist/typescript-client/src/agent/ai-agent-client.types';
 
-export type ChatMessage = {
+type ChatMessageType = 'ai' | 'user';
+
+interface BaseChatMessage {
   id: string;
-  type: 'ai' | 'user';
+  type: ChatMessageType;
   message: string;
+}
+
+export interface AiChatMessage extends BaseChatMessage {
+  type: 'ai';
   voiceFile?: File;
-};
+}
+
+export interface UserChatMessage extends BaseChatMessage {
+  type: 'user';
+}
+
+export type ChatMessage = AiChatMessage | UserChatMessage;
 
 /**
  * Custom API options for the AI agent.
@@ -124,6 +137,9 @@ export interface AiHookResponse {
    */
   history: ChatMessage[];
 
+  /** A map of job IDs to their status updates. */
+  statusUpdates: Record<JobId, Array<AiStatusMessage>>;
+
   /**
    * Data received from the AI response.
    */
@@ -182,8 +198,37 @@ export function useAiHook(
   const [jobId, setJobId] = useState<JobId | undefined>(undefined);
   const [options, setOptions] = useState<AiChatOptions<any> | undefined>(undefined);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
+  const [statusUpdates, setStatusUpdates] = useState<Record<JobId, Array<AiStatusMessage>>>({});
 
-  const { data, error, loading, complete } = useObservable(
+  const statusUpdateObsFun = () => {
+    return squid.ai().agent(agentId).observeStatusUpdates().pipe(map((statusUpdate) => {
+      if (!statusUpdates[statusUpdate.jobId]) {
+        return;
+      }
+
+      setStatusUpdates((prev) => {
+        const prevCopy = { ...prev };
+        prevCopy[statusUpdate.jobId].push(statusUpdate);
+        return prevCopy;
+      });
+    }));
+  };
+
+  useObservable<void>(statusUpdateObsFun, undefined, []);
+
+  const setJobIdAndInitialStatusUpdate = (jobId: JobId | undefined) => {
+    setJobId(jobId);
+    if (!jobId) {
+      return;
+    }
+    setStatusUpdates((prev) => {
+      const prevCopy = { ...prev };
+      prevCopy[jobId] = [];
+      return prevCopy;
+    });
+  };
+
+  const { data, error, loading, complete } = useObservable<string>(
     () => {
       /**
        * 1) Check if we have a customApiUrl in aiQueryOptions. If so, do a manual fetch.
@@ -396,7 +441,7 @@ export function useAiHook(
     if (complete) {
       setFile(null);
       setPrompt('');
-      setJobId(undefined);
+      setJobIdAndInitialStatusUpdate(undefined)
     }
   }, [complete]);
 
@@ -404,7 +449,7 @@ export function useAiHook(
    * Methods exposed to the user of the hook.
    */
   const chat = (newPrompt: string, chatOptions?: AiChatOptions, jobId?: JobId) => {
-    setJobId(jobId);
+    setJobIdAndInitialStatusUpdate(jobId || generateId());
     setPrompt(newPrompt);
     setOptions(chatOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
@@ -412,14 +457,14 @@ export function useAiHook(
   };
 
   const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiChatOptions, jobId?: JobId) => {
-    setJobId(jobId);
+    setJobIdAndInitialStatusUpdate(jobId || generateId());
     setFile(fileToTranscribe);
     setOptions(transcribeOptions);
     setRequestCount((count) => count + 1);
   };
 
   const chatWithVoiceResponse = (newPrompt: string, voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>, jobId?: JobId) => {
-    setJobId(jobId);
+    setJobIdAndInitialStatusUpdate(jobId || generateId());
     setPrompt(newPrompt);
     setOptions(voiceOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
@@ -431,7 +476,7 @@ export function useAiHook(
     voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>,
     jobId?: JobId,
   ) => {
-    setJobId(jobId);
+    setJobIdAndInitialStatusUpdate(jobId || generateId());
     setFile(fileToTranscribe);
     setOptions(voiceOptions);
     setRequestCount((count) => count + 1);
@@ -443,6 +488,7 @@ export function useAiHook(
     chatWithVoiceResponse,
     transcribeAndChatWithVoiceResponse,
     history,
+    statusUpdates,
     data,
     loading,
     error,
