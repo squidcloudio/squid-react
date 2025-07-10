@@ -12,13 +12,13 @@ import {
   TranscribeAndAskWithVoiceResponse,
   TranscribeAndChatResponse,
 } from '@squidcloud/client';
+import { AiAskOptionsWithVoice } from '@squidcloud/client/dist/typescript-client/src/agent/ai-agent-client.types';
 import { ExecuteAiQueryOptions } from '@squidcloud/client/dist/typescript-client/src/ai.types';
 import { assertTruthy } from 'assertic';
 import { useEffect, useState } from 'react';
 import { from, map, mergeMap, of, tap } from 'rxjs';
 import { useObservable } from './useObservable';
 import { useSquid } from './useSquid';
-import { AiAskOptionsWithVoice } from '@squidcloud/client/dist/typescript-client/src/agent/ai-agent-client.types';
 
 type ChatMessageType = 'ai' | 'user';
 
@@ -201,17 +201,22 @@ export function useAiHook(
   const [statusUpdates, setStatusUpdates] = useState<Record<JobId, Array<AiStatusMessage>>>({});
 
   const statusUpdateObsFun = () => {
-    return squid.ai().agent(agentId).observeStatusUpdates().pipe(map((statusUpdate) => {
-      if (!statusUpdates[statusUpdate.jobId]) {
-        return;
-      }
-
-      setStatusUpdates((prev) => {
-        const prevCopy = { ...prev };
-        prevCopy[statusUpdate.jobId].push(statusUpdate);
-        return prevCopy;
-      });
-    }));
+    return squid
+      .ai()
+      .agent(agentId)
+      .observeStatusUpdates()
+      .pipe(
+        map((statusUpdate) => {
+          setStatusUpdates((prev) => {
+            if (!prev[statusUpdate.jobId]) {
+              return prev;
+            }
+            const prevCopy = { ...prev };
+            prevCopy[statusUpdate.jobId].push(statusUpdate);
+            return prevCopy;
+          });
+        }),
+      );
   };
 
   useObservable<void>(statusUpdateObsFun, undefined, []);
@@ -341,7 +346,12 @@ export function useAiHook(
       // (a) Transcribe + Voice Response
       if (file) {
         if (options?.voiceOptions) {
-          return from(squid.ai().agent(agentId).transcribeAndAskWithVoiceResponse(file, options as AiAskOptionsWithVoice<any>, jobId)).pipe(
+          return from(
+            squid
+              .ai()
+              .agent(agentId)
+              .transcribeAndAskWithVoiceResponse(file, options as AiAskOptionsWithVoice<any>, jobId),
+          ).pipe(
             map((response: TranscribeAndAskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -360,7 +370,12 @@ export function useAiHook(
           // (b) Transcribe + Chat streaming
           const userMessageId = generateId();
           const aiMessageId = generateId();
-          return from(squid.ai().agent(agentId).transcribeAndChat(file, options as AiChatOptionsWithoutVoice, jobId)).pipe(
+          return from(
+            squid
+              .ai()
+              .agent(agentId)
+              .transcribeAndChat(file, options as AiChatOptionsWithoutVoice, jobId),
+          ).pipe(
             mergeMap((response: TranscribeAndChatResponse) => {
               setHistory((prev) => {
                 const prevCopy = [...prev];
@@ -392,7 +407,12 @@ export function useAiHook(
       // (c) Text + Voice Response
       else if (prompt) {
         if (options?.voiceOptions) {
-          return from(squid.ai().agent(agentId).askWithVoiceResponse(prompt, options as AiAskOptionsWithVoice<any>, jobId)).pipe(
+          return from(
+            squid
+              .ai()
+              .agent(agentId)
+              .askWithVoiceResponse(prompt, options as AiAskOptionsWithVoice<any>, jobId),
+          ).pipe(
             map((response: AskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
@@ -441,7 +461,7 @@ export function useAiHook(
     if (complete) {
       setFile(null);
       setPrompt('');
-      setJobIdAndInitialStatusUpdate(undefined)
+      setJobIdAndInitialStatusUpdate(undefined);
     }
   }, [complete]);
 
@@ -463,7 +483,11 @@ export function useAiHook(
     setRequestCount((count) => count + 1);
   };
 
-  const chatWithVoiceResponse = (newPrompt: string, voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>, jobId?: JobId) => {
+  const chatWithVoiceResponse = (
+    newPrompt: string,
+    voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>,
+    jobId?: JobId,
+  ) => {
     setJobIdAndInitialStatusUpdate(jobId || generateId());
     setPrompt(newPrompt);
     setOptions(voiceOptions);

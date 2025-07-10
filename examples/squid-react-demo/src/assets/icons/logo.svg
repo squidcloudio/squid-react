@@ -1,0 +1,13 @@
+<svg width="130" height="33" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .codefriend-text {
+    font-family: "Inter", sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    fill: currentColor;
+    }
+  </style>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="codefriend-text">
+    CodeFriend
+  </text>
+</svg>
