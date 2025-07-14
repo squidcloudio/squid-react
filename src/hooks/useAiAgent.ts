@@ -26,6 +26,7 @@ interface BaseChatMessage {
   id: string;
   type: ChatMessageType;
   message: string;
+  jobId: JobId | undefined;
 }
 
 export interface AiChatMessage extends BaseChatMessage {
@@ -276,7 +277,7 @@ export function useAiHook(
                 answer = json?.response;
               }
               const finalAnswer = answer ?? '';
-              setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: finalAnswer }]);
+              setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: finalAnswer, jobId }]);
               return finalAnswer;
             }),
         );
@@ -296,7 +297,7 @@ export function useAiHook(
             if (response.explanation) {
               result += `\n\n### Walkthrough\n\n${response.explanation}`;
             }
-            setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: result }]);
+            setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: result, jobId }]);
             return result;
           }),
         );
@@ -332,7 +333,7 @@ export function useAiHook(
             if (response.explanation) {
               result += `\n\n### Walkthrough\n\n${response.explanation}`;
             }
-            setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: result }]);
+            setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: result, jobId }]);
             return result;
           }),
         );
@@ -355,12 +356,13 @@ export function useAiHook(
             map((response: TranscribeAndAskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
-                { id: generateId(), type: 'user', message: response.transcribedPrompt, voiceFile: file },
+                { id: generateId(), type: 'user', message: response.transcribedPrompt, voiceFile: file, jobId },
                 {
                   id: generateId(),
                   type: 'ai',
                   message: response.responseString,
                   voiceFile: response.voiceResponseFile,
+                  jobId,
                 },
               ]);
               return response.responseString;
@@ -383,7 +385,7 @@ export function useAiHook(
                 if (prevIndex >= 0) {
                   return prevCopy;
                 }
-                prevCopy.push({ id: userMessageId, type: 'user', message: response.transcribedPrompt });
+                prevCopy.push({ id: userMessageId, type: 'user', message: response.transcribedPrompt, jobId });
                 return prevCopy;
               });
               return response.responseStream;
@@ -393,10 +395,10 @@ export function useAiHook(
                 const prevCopy = [...prev];
                 const prevIndex = prevCopy.findIndex((item) => item.id === aiMessageId);
                 if (prevIndex >= 0) {
-                  prevCopy[prevIndex] = { id: aiMessageId, type: 'ai', message: response };
+                  prevCopy[prevIndex] = { id: aiMessageId, type: 'ai', message: response, jobId };
                   return prevCopy;
                 }
-                prevCopy.push({ id: aiMessageId, type: 'ai', message: response });
+                prevCopy.push({ id: aiMessageId, type: 'ai', message: response, jobId });
                 return prevCopy;
               });
               return response;
@@ -416,12 +418,13 @@ export function useAiHook(
             map((response: AskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
-                { id: generateId(), type: 'user', message: prompt },
+                { id: generateId(), type: 'user', message: prompt, jobId },
                 {
                   id: generateId(),
                   type: 'ai',
                   message: response.responseString,
                   voiceFile: response.voiceResponseFile,
+                  jobId,
                 },
               ]);
               return response.responseString;
@@ -440,10 +443,10 @@ export function useAiHook(
                   const prevCopy = [...prev];
                   const prevIndex = prevCopy.findIndex((item) => item.id === id);
                   if (prevIndex >= 0) {
-                    prevCopy[prevIndex] = { id, type: 'ai', message: response };
+                    prevCopy[prevIndex] = { id, type: 'ai', message: response, jobId };
                     return prevCopy;
                   }
-                  prevCopy.push({ id, type: 'ai', message: response });
+                  prevCopy.push({ id, type: 'ai', message: response, jobId });
                   return prevCopy;
                 });
               }),
@@ -472,7 +475,7 @@ export function useAiHook(
     setJobIdAndInitialStatusUpdate(jobId || generateId());
     setPrompt(newPrompt);
     setOptions(chatOptions);
-    setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
+    setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt, jobId }]);
     setRequestCount((count) => count + 1);
   };
 
@@ -491,7 +494,7 @@ export function useAiHook(
     setJobIdAndInitialStatusUpdate(jobId || generateId());
     setPrompt(newPrompt);
     setOptions(voiceOptions);
-    setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt }]);
+    setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt, jobId }]);
     setRequestCount((count) => count + 1);
   };
 
