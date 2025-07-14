@@ -472,7 +472,8 @@ export function useAiHook(
    * Methods exposed to the user of the hook.
    */
   const chat = (newPrompt: string, chatOptions?: AiChatOptions, jobId?: JobId) => {
-    setJobIdAndInitialStatusUpdate(jobId || generateId());
+    jobId = jobId || generateId();
+    setJobIdAndInitialStatusUpdate(jobId);
     setPrompt(newPrompt);
     setOptions(chatOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt, jobId }]);
@@ -480,7 +481,8 @@ export function useAiHook(
   };
 
   const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiChatOptions, jobId?: JobId) => {
-    setJobIdAndInitialStatusUpdate(jobId || generateId());
+    jobId = jobId || generateId();
+    setJobIdAndInitialStatusUpdate(jobId);
     setFile(fileToTranscribe);
     setOptions(transcribeOptions);
     setRequestCount((count) => count + 1);
@@ -491,7 +493,8 @@ export function useAiHook(
     voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>,
     jobId?: JobId,
   ) => {
-    setJobIdAndInitialStatusUpdate(jobId || generateId());
+    jobId = jobId || generateId();
+    setJobIdAndInitialStatusUpdate(jobId);
     setPrompt(newPrompt);
     setOptions(voiceOptions);
     setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt, jobId }]);
@@ -503,7 +506,8 @@ export function useAiHook(
     voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>,
     jobId?: JobId,
   ) => {
-    setJobIdAndInitialStatusUpdate(jobId || generateId());
+    jobId = jobId || generateId();
+    setJobIdAndInitialStatusUpdate(jobId);
     setFile(fileToTranscribe);
     setOptions(voiceOptions);
     setRequestCount((count) => count + 1);
