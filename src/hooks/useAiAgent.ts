@@ -308,26 +308,18 @@ export function useAiHook(
        */
       if (aiQuery) {
         if (!prompt) return of('');
-        return from(squid.ai().executeAiQueryMulti(integrationIds, prompt, aiQueryOptions)).pipe(
+        assertTruthy(integrationIds.length === 1, 'Must provide exactly one Database integration.');
+        return from(squid.ai().executeAiQuery(integrationIds[0], prompt, aiQueryOptions)).pipe(
           map((response) => {
-            if (!response.success) {
-              throw new Error(response.answer);
-            }
+            assertTruthy(response.success, response.answer);
             let result = `### Result\n\n${response.answer}`;
-            const numOfExecutesQueries = response.executedQueries.length;
-            if (numOfExecutesQueries) {
-              for (let i = 0; i < response.executedQueries.length; i++) {
-                const executedQuery = response.executedQueries[i];
-                if (numOfExecutesQueries > 1 && i === 0) {
-                  result += `\n\n### Executed Queries\n\n`;
-                }
-                const prefix = numOfExecutesQueries > 1 ? `#### Query ${i + 1}` : '### Executed Query';
-                result += `\n\n${prefix}\n\n\`\`\`${executedQuery.markdownType || 'sql'}\n${
-                  executedQuery.query
-                }\n\`\`\``;
-                if (executedQuery.rawResultsUrl) {
-                  result += `\n[View Raw Results](${executedQuery.rawResultsUrl})\n\n`;
-                }
+            if (response.executedQuery) {
+              const prefix = '### Executed Query';
+              result += `\n\n${prefix}\n\n\`\`\`${response.queryMarkdownType || 'sql'}\n${
+                response.executedQuery
+              }\n\`\`\``;
+              if (response.rawResultsUrl) {
+                result += `\n[View Raw Results](${response.rawResultsUrl})\n\n`;
               }
             }
             if (response.explanation) {
