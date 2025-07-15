@@ -51,6 +51,7 @@ terraform.tfstate.backup
 # IntelliJ
 /core/src/sandbox.ts
 /deno-server/tmp/
+.idea/aws.xml
 
 # Docker
 .docker/
@@ -60,3 +61,8 @@ terraform.tfstate.backup
 # NPM
 .npmrc
 generated-docs
+
+.next
+.yalc
+
+examples/**/build
