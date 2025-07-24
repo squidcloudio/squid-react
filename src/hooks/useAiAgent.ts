@@ -2,18 +2,18 @@
 
 import {
   AiAgentId,
+  AiAskOptionsWithVoice,
   AiChatOptions,
   AiChatOptionsWithoutVoice,
   AiStatusMessage,
   AskWithVoiceResponse,
+  ExecuteAiQueryOptions,
   generateId,
   IntegrationId,
   JobId,
   TranscribeAndAskWithVoiceResponse,
   TranscribeAndChatResponse,
 } from '@squidcloud/client';
-import { AiAskOptionsWithVoice } from '@squidcloud/client/dist/typescript-client/src/agent/ai-agent-client.types';
-import { ExecuteAiQueryOptions } from '@squidcloud/client/dist/typescript-client/src/ai.types';
 import { assertTruthy } from 'assertic';
 import { useEffect, useState } from 'react';
 import { from, map, mergeMap, of, tap } from 'rxjs';
@@ -246,6 +246,7 @@ export function useAiHook(
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'x-squid-clientid': squid.connectionDetails().clientId,
               ...(customApiOptions.customApiHeaders || {}),
             },
             body: JSON.stringify({ prompt, jobId }),
