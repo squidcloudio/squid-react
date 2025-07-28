@@ -58,6 +58,11 @@ export interface CustomApiOptions {
    * An optional record of custom headers to send with the request.
    */
   customApiHeaders?: Record<string, string>;
+
+  /**
+   * An optional agent ID to use for this request.
+   */
+  agentId?: AiAgentId;
 }
 
 /**
@@ -220,7 +225,9 @@ export function useAiHook(
             const aiResponse = statusUpdate.tags?.[AI_STATUS_MESSAGE_RESULT_TAG];
             if (aiResponse) {
               const parentMessageId = statusUpdate.tags?.[AI_STATUS_MESSAGE_PARENT_MESSAGE_ID_TAG];
-              const parentStatus = parentMessageId ? prevStatusUpdates.find(s => s.messageId === parentMessageId) : undefined;
+              const parentStatus = parentMessageId
+                ? prevStatusUpdates.find((s) => s.messageId === parentMessageId)
+                : undefined;
               if (parentStatus) {
                 parentStatus.tags = { ...(parentStatus.tags || {}), result: aiResponse };
                 return prevCopy;
@@ -548,7 +555,7 @@ export function useAskWithApi(options: CustomApiOptions): AiHookResponse {
   return useAiHook(
     [], // No integration IDs needed for a custom API
     false, // Not an AI query on databases
-    undefined, // No agent ID needed
+    options.agentId,
     false, // Not a Squid-based API integration
     undefined, // No allowed endpoints needed
     undefined, // No explanation needed
