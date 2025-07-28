@@ -1,6 +1,8 @@
 'use client';
 
 import {
+  AI_STATUS_MESSAGE_PARENT_MESSAGE_ID_TAG,
+  AI_STATUS_MESSAGE_RESULT_TAG,
   AiAgentId,
   AiAskOptionsWithVoice,
   AiChatOptions,
@@ -213,7 +215,19 @@ export function useAiHook(
               return prev;
             }
             const prevCopy = { ...prev };
-            prevCopy[statusUpdate.jobId].push(statusUpdate);
+            const prevStatusUpdates = prevCopy[statusUpdate.jobId];
+
+            const aiResponse = statusUpdate.tags?.[AI_STATUS_MESSAGE_RESULT_TAG];
+            if (aiResponse) {
+              const parentMessageId = statusUpdate.tags?.[AI_STATUS_MESSAGE_PARENT_MESSAGE_ID_TAG];
+              const parentStatus = parentMessageId ? prevStatusUpdates.find(s => s.messageId === parentMessageId) : undefined;
+              if (parentStatus) {
+                parentStatus.tags = { ...(parentStatus.tags || {}), result: aiResponse };
+                return prevCopy;
+              }
+            }
+
+            prevStatusUpdates.push(statusUpdate);
             return prevCopy;
           });
         }),
