@@ -69,8 +69,8 @@ export interface CustomApiOptions {
  * Custom hook for handling prompts to an AI agent.
  * @param agentId
  */
-export function useAiAgent(agentId: AiAgentId): AiHookResponse {
-  return useAiHook(['ai_agents'], false, agentId);
+export function useAiAgent(agentId: AiAgentId, options?: AiChatOptions): AiHookResponse {
+  return useAiHook(['ai_agents'], false, agentId, false, undefined, false, undefined, undefined, options);
 }
 
 /**
@@ -195,6 +195,7 @@ export function useAiHook(
   provideExplanationApiWithAi?: boolean,
   aiQueryOptions?: ExecuteAiQueryOptions,
   customApiOptions?: CustomApiOptions,
+  aiAgentChatOptions?: AiChatOptions,
 ): AiHookResponse {
   const squid = useSquid();
   // If it's an AI query or API integration, we rely on the Squid API key.
@@ -204,7 +205,7 @@ export function useAiHook(
   const [requestCount, setRequestCount] = useState(0);
   const [prompt, setPrompt] = useState('');
   const [jobId, setJobId] = useState<JobId | undefined>(undefined);
-  const [options, setOptions] = useState<AiChatOptions | undefined>(undefined);
+  const [options, setOptions] = useState<AiChatOptions | undefined>(aiAgentChatOptions);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
   const [statusUpdates, setStatusUpdates] = useState<Record<JobId, Array<AiStatusMessage>>>({});
 
@@ -216,7 +217,7 @@ export function useAiHook(
         .agent(agentId)
         .getChatHistory(memoryId)
         .then(chatHistory => {
-          const newHistory = chatHistory.map(item => {
+          const history = chatHistory.map(item => {
             return {
               id: item.id,
               type: item.source,
@@ -224,7 +225,7 @@ export function useAiHook(
               jobId: undefined,
             };
           });
-          setHistory(newHistory);
+          setHistory(history);
         });
     }
   }, [squid, agentId, memoryId]);
