@@ -204,9 +204,30 @@ export function useAiHook(
   const [requestCount, setRequestCount] = useState(0);
   const [prompt, setPrompt] = useState('');
   const [jobId, setJobId] = useState<JobId | undefined>(undefined);
-  const [options, setOptions] = useState<AiChatOptions<any> | undefined>(undefined);
+  const [options, setOptions] = useState<AiChatOptions | undefined>(undefined);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
   const [statusUpdates, setStatusUpdates] = useState<Record<JobId, Array<AiStatusMessage>>>({});
+
+  const memoryId = options?.memoryOptions?.memoryId;
+  useEffect(() => {
+    if (memoryId) {
+      squid
+        .ai()
+        .agent(agentId)
+        .getChatHistory(memoryId)
+        .then(chatHistory => {
+          const newHistory = chatHistory.map(item => {
+            return {
+              id: item.id,
+              type: item.source,
+              message: item.message,
+              jobId: undefined,
+            };
+          });
+          setHistory(newHistory);
+        });
+    }
+  }, [squid, agentId, memoryId]);
 
   const statusUpdateObsFun = () => {
     return squid
