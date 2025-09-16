@@ -10,14 +10,14 @@ import {
   AiStatusMessage,
   AskWithVoiceResponse,
   ExecuteAiQueryOptions,
-  generateId,
+  generateUUID,
   IntegrationId,
   JobId,
   TranscribeAndAskWithVoiceResponse,
   TranscribeAndChatResponse,
 } from '@squidcloud/client';
 import { assertTruthy } from 'assertic';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { from, map, mergeMap, of, tap } from 'rxjs';
 import { useObservable } from './useObservable';
 import { useSquid } from './useSquid';
@@ -65,14 +65,17 @@ export interface CustomApiOptions {
   agentId?: AiAgentId;
 }
 
+// noinspection JSUnusedGlobalSymbols
 /**
  * Custom hook for handling prompts to an AI agent.
  * @param agentId
+ * @param options - default options for all interactions with the agent in the current session.
  */
-export function useAiAgent(agentId: AiAgentId): AiHookResponse {
-  return useAiHook(['ai_agents'], false, agentId);
+export function useAiAgent(agentId: AiAgentId, options?: AiChatOptions): AiHookResponse {
+  return useAiHook(['ai_agents'], false, agentId, false, undefined, false, undefined, undefined, options);
 }
 
+// noinspection JSUnusedGlobalSymbols
 /**
  * Custom hook for making AI queries with a given database integration ID.
  * @param integrationId - The unique identifier for the database integration instance.
@@ -83,6 +86,7 @@ export function useAiQuery(integrationId: IntegrationId, options?: ExecuteAiQuer
   return useAiHook([integrationId], true, undefined, undefined, undefined, undefined, options);
 }
 
+// noinspection JSUnusedGlobalSymbols
 /**
  * Custom hook for making AI queries with a given API integration ID.
  * @param integrationId - The unique identifier for the API integration instance.
@@ -97,6 +101,7 @@ export function useAiOnApi(
   return useAiHook([integrationId], true, undefined, true, allowedApiEndpoints, provideExplanationApiWithAi);
 }
 
+// noinspection JSUnusedGlobalSymbols
 /**
  * Custom hook for making AI queries with multiple database integration IDs.
  * @param integrationIds - The unique identifiers for the database integrations.
@@ -145,7 +150,7 @@ export interface AiHookResponse {
    */
   history: ChatMessage[];
 
-  /** A map of job IDs to their status updates. */
+  /** A map of job IDs with their status updates. */
   statusUpdates: Record<JobId, Array<AiStatusMessage>>;
 
   /**
@@ -185,6 +190,7 @@ export interface AiHookResponse {
  * @param provideExplanationApiWithAi - For an API integration, set to true for an explanation.
  * @param aiQueryOptions - Options for the AI query (may include `customApiUrl`, `customApiKey`).
  * @param customApiOptions - Optional custom API options for the AI agent, such as `customApiUrl`, `customApiJobId`, and `customApiHeaders`.
+ * @param aiAgentChatOptions - Optional chat options for the AI agent. Used by default for all chat() calls.
  */
 export function useAiHook(
   integrationIds: Array<IntegrationId>,
@@ -195,6 +201,7 @@ export function useAiHook(
   provideExplanationApiWithAi?: boolean,
   aiQueryOptions?: ExecuteAiQueryOptions,
   customApiOptions?: CustomApiOptions,
+  aiAgentChatOptions?: AiChatOptions,
 ): AiHookResponse {
   const squid = useSquid();
   // If it's an AI query or API integration, we rely on the Squid API key.
@@ -204,9 +211,37 @@ export function useAiHook(
   const [requestCount, setRequestCount] = useState(0);
   const [prompt, setPrompt] = useState('');
   const [jobId, setJobId] = useState<JobId | undefined>(undefined);
-  const [options, setOptions] = useState<AiChatOptions<any> | undefined>(undefined);
+  const [options, setOptions] = useState<AiChatOptions | undefined>(aiAgentChatOptions);
   const [history, setHistory] = useState<Array<ChatMessage>>([]);
   const [statusUpdates, setStatusUpdates] = useState<Record<JobId, Array<AiStatusMessage>>>({});
+
+  // Memoizes memoryId to prevent unnecessary useEffect triggers when the 'options' object reference changes.
+  const memoryId = useMemo(() => options?.memoryOptions?.memoryId, [options?.memoryOptions?.memoryId]);
+
+  /**
+   * Loads chat history from Squid when memoryId is present.
+   * History is completely replaced when memoryId changes between chat calls.
+   * Only triggers when squid, agentId, or memoryId values actually change.
+   */
+  useEffect(() => {
+    if (memoryId) {
+      squid
+        .ai()
+        .agent(agentId)
+        .getChatHistory(memoryId)
+        .then(chatHistory => {
+          const history = chatHistory.map(item => {
+            return {
+              id: item.id,
+              type: item.source,
+              message: item.message,
+              jobId: undefined,
+            };
+          });
+          setHistory(history);
+        });
+    }
+  }, [squid, agentId, memoryId]);
 
   const statusUpdateObsFun = () => {
     return squid
@@ -299,7 +334,7 @@ export function useAiHook(
                 answer = json?.response;
               }
               const finalAnswer = answer ?? '';
-              setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: finalAnswer, jobId }]);
+              setHistory((prev) => [...prev, { id: generateUUID(), type: 'ai', message: finalAnswer, jobId }]);
               return finalAnswer;
             }),
         );
@@ -319,7 +354,7 @@ export function useAiHook(
             if (response.explanation) {
               result += `\n\n### Walkthrough\n\n${response.explanation}`;
             }
-            setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: result, jobId }]);
+            setHistory((prev) => [...prev, { id: generateUUID(), type: 'ai', message: result, jobId }]);
             return result;
           }),
         );
@@ -347,7 +382,7 @@ export function useAiHook(
             if (response.explanation) {
               result += `\n\n### Walkthrough\n\n${response.explanation}`;
             }
-            setHistory((prev) => [...prev, { id: generateId(), type: 'ai', message: result, jobId }]);
+            setHistory((prev) => [...prev, { id: generateUUID(), type: 'ai', message: result, jobId }]);
             return result;
           }),
         );
@@ -370,9 +405,9 @@ export function useAiHook(
             map((response: TranscribeAndAskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
-                { id: generateId(), type: 'user', message: response.transcribedPrompt, voiceFile: file, jobId },
+                { id: generateUUID(), type: 'user', message: response.transcribedPrompt, voiceFile: file, jobId },
                 {
-                  id: generateId(),
+                  id: generateUUID(),
                   type: 'ai',
                   message: response.responseString,
                   voiceFile: response.voiceResponseFile,
@@ -383,9 +418,9 @@ export function useAiHook(
             }),
           );
         } else {
-          // (b) Transcribe + Chat streaming
-          const userMessageId = generateId();
-          const aiMessageId = generateId();
+          // (b) Transcribe plus Chat streaming.
+          const userMessageId = generateUUID();
+          const aiMessageId = generateUUID();
           return from(
             squid
               .ai()
@@ -432,9 +467,9 @@ export function useAiHook(
             map((response: AskWithVoiceResponse) => {
               setHistory((prev) => [
                 ...prev,
-                { id: generateId(), type: 'user', message: prompt, jobId },
+                { id: generateUUID(), type: 'user', message: prompt, jobId },
                 {
-                  id: generateId(),
+                  id: generateUUID(),
                   type: 'ai',
                   message: response.responseString,
                   voiceFile: response.voiceResponseFile,
@@ -446,7 +481,7 @@ export function useAiHook(
           );
         } else {
           // (d) Plain text chat streaming
-          const id = generateId();
+          const id = generateUUID();
           return squid
             .ai()
             .agent(agentId)
@@ -483,22 +518,33 @@ export function useAiHook(
   }, [complete]);
 
   /**
+   * Merges chat options safely without causing unnecessary re-renders.
+   * Combines default aiAgentChatOptions with new options, where new options take precedence.
+   * Returns the same reference when inputs haven't changed to prevent useEffect dependencies from triggering.
+   */
+  const mergeOptions = useCallback((newOptions?: AiChatOptions) => {
+    if (!newOptions) return aiAgentChatOptions;
+    if (!aiAgentChatOptions) return newOptions;
+    return { ...aiAgentChatOptions, ...newOptions };
+  }, [aiAgentChatOptions]);
+
+  /**
    * Methods exposed to the user of the hook.
    */
   const chat = (newPrompt: string, chatOptions?: AiChatOptions, jobId?: JobId) => {
-    jobId = jobId || generateId();
+    jobId = jobId || generateUUID();
     setJobIdAndInitialStatusUpdate(jobId);
     setPrompt(newPrompt);
-    setOptions(chatOptions);
-    setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt, jobId }]);
+    setOptions(mergeOptions(chatOptions));
+    setHistory((prev) => [...prev, { id: generateUUID(), type: 'user', message: newPrompt, jobId }]);
     setRequestCount((count) => count + 1);
   };
 
   const transcribeAndChat = (fileToTranscribe: File, transcribeOptions?: AiChatOptions, jobId?: JobId) => {
-    jobId = jobId || generateId();
+    jobId = jobId || generateUUID();
     setJobIdAndInitialStatusUpdate(jobId);
     setFile(fileToTranscribe);
-    setOptions(transcribeOptions);
+    setOptions(mergeOptions(transcribeOptions));
     setRequestCount((count) => count + 1);
   };
 
@@ -507,11 +553,11 @@ export function useAiHook(
     voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>,
     jobId?: JobId,
   ) => {
-    jobId = jobId || generateId();
+    jobId = jobId || generateUUID();
     setJobIdAndInitialStatusUpdate(jobId);
     setPrompt(newPrompt);
-    setOptions(voiceOptions);
-    setHistory((prev) => [...prev, { id: generateId(), type: 'user', message: newPrompt, jobId }]);
+    setOptions(mergeOptions(voiceOptions));
+    setHistory((prev) => [...prev, { id: generateUUID(), type: 'user', message: newPrompt, jobId }]);
     setRequestCount((count) => count + 1);
   };
 
@@ -520,10 +566,10 @@ export function useAiHook(
     voiceOptions?: Omit<AiChatOptions, 'smoothTyping'>,
     jobId?: JobId,
   ) => {
-    jobId = jobId || generateId();
+    jobId = jobId || generateUUID();
     setJobIdAndInitialStatusUpdate(jobId);
     setFile(fileToTranscribe);
-    setOptions(voiceOptions);
+    setOptions(mergeOptions(voiceOptions));
     setRequestCount((count) => count + 1);
   };
 
@@ -541,6 +587,7 @@ export function useAiHook(
   };
 }
 
+// noinspection JSUnusedGlobalSymbols
 /**
  * A convenient hook for simply passing a prompt to a custom API endpoint
  * that expects a JSON body `{ prompt: string }` and can return `{ response: string }`
