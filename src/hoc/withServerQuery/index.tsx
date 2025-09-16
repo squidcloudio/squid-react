@@ -1,9 +1,10 @@
 import { SnapshotEmitter } from '@squidcloud/client';
 import React from 'react';
 import WithQueryServer from './WithQueryServer';
-import { WithQueryProps, WithQueryOptions } from './types';
+import { WithQueryProps, WithQueryOptions, DEFAULT_WITH_QUERY_OPTIONS } from './types';
 
-export { WithQueryProps, WithQueryOptions, DEFAULT_WITH_QUERY_OPTIONS } from './types';
+export type { WithQueryProps, WithQueryOptions };
+export { DEFAULT_WITH_QUERY_OPTIONS };
 
 /**
  * Higher Order Component (HOC) to wrap a component with a server query.
