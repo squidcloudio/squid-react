@@ -217,6 +217,12 @@ export function useAiHook(
 
   // Memoizes memoryId to prevent unnecessary useEffect triggers when the 'options' object reference changes.
   const memoryId = useMemo(() => options?.memoryOptions?.memoryId, [options?.memoryOptions?.memoryId]);
+
+  /**
+   * Loads chat history from Squid when memoryId is present.
+   * History is completely replaced when memoryId changes between chat calls.
+   * Only triggers when squid, agentId, or memoryId values actually change.
+   */
   useEffect(() => {
     if (memoryId) {
       squid
