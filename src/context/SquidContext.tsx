@@ -2,7 +2,11 @@
 
 import { Squid, SquidOptions } from '@squidcloud/client';
 import React, { useRef } from 'react';
-import { SquidContextType } from '../types';
+
+/** Type representing the context for the Squid library. */
+export type SquidContextType = {
+  squid: Squid | null;
+};
 
 /**
  * React Context for Squid.

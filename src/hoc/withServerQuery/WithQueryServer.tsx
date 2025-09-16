@@ -5,7 +5,7 @@ import {
   DEFAULT_WITH_QUERY_OPTIONS,
   WithQueryOptions,
   WithQueryProps,
-} from './index';
+} from './types';
 
 type PropTypes<C extends React.ComponentType<any>, T> = {
   Component: C;

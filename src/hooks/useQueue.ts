@@ -50,5 +50,3 @@ export function useQueue<T>(
 
   return { error, data, produce };
 }
-
-export default useQueue;
