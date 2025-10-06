@@ -72,7 +72,7 @@ export interface CustomApiOptions {
  * @param options - default options for all interactions with the agent in the current session.
  */
 export function useAiAgent(agentId: AiAgentId, options?: AiChatOptions): AiHookResponse {
-  return useAiHook(['ai_agents'], false, agentId, false, undefined, false, undefined, undefined, options);
+  return useAiHook('ai_agents', false, agentId, false, undefined, false, undefined, undefined, options);
 }
 
 // noinspection JSUnusedGlobalSymbols
@@ -83,7 +83,7 @@ export function useAiAgent(agentId: AiAgentId, options?: AiChatOptions): AiHookR
  * @returns An object containing methods and state for AI chat interactions.
  */
 export function useAiQuery(integrationId: IntegrationId, options?: ExecuteAiQueryOptions): AiHookResponse {
-  return useAiHook([integrationId], true, undefined, undefined, undefined, undefined, options);
+  return useAiHook(integrationId, true, undefined, undefined, undefined, undefined, options);
 }
 
 // noinspection JSUnusedGlobalSymbols
@@ -98,18 +98,7 @@ export function useAiOnApi(
   allowedApiEndpoints?: string[],
   provideExplanationApiWithAi?: boolean,
 ): AiHookResponse {
-  return useAiHook([integrationId], true, undefined, true, allowedApiEndpoints, provideExplanationApiWithAi);
-}
-
-// noinspection JSUnusedGlobalSymbols
-/**
- * Custom hook for making AI queries with multiple database integration IDs.
- * @param integrationIds - The unique identifiers for the database integrations.
- * @param options - Optional configurations for the AI query.
- * @returns An object containing methods and state for AI chat interactions.
- */
-export function useAiQueryMulti(integrationIds: Array<IntegrationId>, options?: ExecuteAiQueryOptions): AiHookResponse {
-  return useAiHook(integrationIds, true, undefined, undefined, undefined, undefined, options);
+  return useAiHook(integrationId, true, undefined, true, allowedApiEndpoints, provideExplanationApiWithAi);
 }
 
 export interface AiHookResponse {
@@ -182,7 +171,7 @@ export interface AiHookResponse {
  * 3. AI Query (when `aiQuery` is true).
  * 4. Chat transcription or chat with a local agent (default path).
  *
- * @param integrationIds - List of integration IDs to use in the hook.
+ * @param integrationId - An integration IDs to use in the hook.
  * @param aiQuery - True if this is an AI query.
  * @param agentId - Required if both aiQuery and apiIntegration are false.
  * @param apiIntegration - True if the integration passed in is an API integration.
@@ -193,7 +182,7 @@ export interface AiHookResponse {
  * @param aiAgentChatOptions - Optional chat options for the AI agent. Used by default for all chat() calls.
  */
 export function useAiHook(
-  integrationIds: Array<IntegrationId>,
+  integrationId: IntegrationId | undefined,
   aiQuery: boolean,
   agentId?: string,
   apiIntegration = false,
@@ -345,9 +334,9 @@ export function useAiHook(
        */
       if (apiIntegration) {
         if (!prompt) return of('');
-        assertTruthy(integrationIds.length === 1, 'Must provide exactly one API integration.');
+        assertTruthy(integrationId, 'Must provide an API integration ID.');
         return from(
-          squid.ai().executeAiApiCall(integrationIds[0], prompt, allowedApiEndpoints, provideExplanationApiWithAi),
+          squid.ai().executeAiApiCall(integrationId, prompt, allowedApiEndpoints, provideExplanationApiWithAi),
         ).pipe(
           map((response) => {
             let result = `### Result\n\n${response.answer}`;
@@ -365,8 +354,8 @@ export function useAiHook(
        */
       if (aiQuery) {
         if (!prompt) return of('');
-        assertTruthy(integrationIds.length === 1, 'Must provide exactly one Database integration.');
-        return from(squid.ai().executeAiQuery(integrationIds[0], prompt, aiQueryOptions)).pipe(
+        assertTruthy(integrationId, 'Must provide a Database integration ID.');
+        return from(squid.ai().executeAiQuery(integrationId, prompt, aiQueryOptions)).pipe(
           map((response) => {
             assertTruthy(response.success, response.answer);
             let result = `### Result\n\n${response.answer}`;
@@ -600,7 +589,7 @@ export function useAiHook(
  */
 export function useAskWithApi(options: CustomApiOptions): AiHookResponse {
   return useAiHook(
-    [], // No integration IDs needed for a custom API
+    undefined, // No integration IDs needed for a custom API
     false, // Not an AI query on databases
     options.agentId,
     false, // Not a Squid-based API integration
