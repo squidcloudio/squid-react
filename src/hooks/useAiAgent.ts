@@ -70,10 +70,11 @@ export interface CustomApiOptions {
 /**
  * Custom hook for handling prompts to an AI agent.
  * @param agentId
- * @param options - default options for all interactions with the agent in the current session.
+ * @param chatOptions - default options for all interactions with the agent in the current session.
+ * @param clientOptions - options for how to connect to the agent from the client
  */
-export function useAiAgent(agentId: AiAgentId, options?: AiChatOptions, chatOptions?: AiAgentClientOptions): AiHookResponse {
-  return useAiHook('ai_agents', false, agentId, false, undefined, false, undefined, undefined, options, chatOptions);
+export function useAiAgent(agentId: AiAgentId, chatOptions?: AiChatOptions, clientOptions?: AiAgentClientOptions): AiHookResponse {
+  return useAiHook('ai_agents', false, agentId, false, undefined, false, undefined, undefined, chatOptions, clientOptions);
 }
 
 // noinspection JSUnusedGlobalSymbols
