@@ -2,7 +2,9 @@ import { useAiAgent } from '@squidcloud/react';
 import { useEffect } from 'react';
 
 export default function Main() {
-  const { chat, statusUpdates } = useAiAgent('saaa');
+  const { chat, statusUpdates } = useAiAgent('saaa', {
+    apiKey: import.meta.env.VITE_SQUID_AGENT_API_KEY,
+  });
   useEffect(() => {
     console.log('Status updates', statusUpdates);
   }, [statusUpdates]);

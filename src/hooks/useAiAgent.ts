@@ -9,12 +9,13 @@ import {
   AiChatOptionsWithoutVoice,
   AiStatusMessage,
   AskWithVoiceResponse,
-  ExecuteAiQueryOptions,
+  AiQueryOptions,
   generateUUID,
   IntegrationId,
   JobId,
   TranscribeAndAskWithVoiceResponse,
   TranscribeAndChatResponse,
+  AiAgentClientOptions,
 } from '@squidcloud/client';
 import { assertTruthy } from 'assertic';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -69,10 +70,11 @@ export interface CustomApiOptions {
 /**
  * Custom hook for handling prompts to an AI agent.
  * @param agentId
- * @param options - default options for all interactions with the agent in the current session.
+ * @param chatOptions - default options for all interactions with the agent in the current session.
+ * @param clientOptions - options for how to connect to the agent from the client
  */
-export function useAiAgent(agentId: AiAgentId, options?: AiChatOptions): AiHookResponse {
-  return useAiHook('ai_agents', false, agentId, false, undefined, false, undefined, undefined, options);
+export function useAiAgent(agentId: AiAgentId, chatOptions?: AiChatOptions, clientOptions?: AiAgentClientOptions): AiHookResponse {
+  return useAiHook('ai_agents', false, agentId, false, undefined, false, undefined, undefined, chatOptions, clientOptions);
 }
 
 // noinspection JSUnusedGlobalSymbols
@@ -82,7 +84,7 @@ export function useAiAgent(agentId: AiAgentId, options?: AiChatOptions): AiHookR
  * @param options - Optional configurations for the AI query.
  * @returns An object containing methods and state for AI chat interactions.
  */
-export function useAiQuery(integrationId: IntegrationId, options?: ExecuteAiQueryOptions): AiHookResponse {
+export function useAiQuery(integrationId: IntegrationId, options?: AiQueryOptions): AiHookResponse {
   return useAiHook(integrationId, true, undefined, undefined, undefined, undefined, options);
 }
 
@@ -180,6 +182,7 @@ export interface AiHookResponse {
  * @param aiQueryOptions - Options for the AI query (may include `customApiUrl`, `customApiKey`).
  * @param customApiOptions - Optional custom API options for the AI agent, such as `customApiUrl`, `customApiJobId`, and `customApiHeaders`.
  * @param aiAgentChatOptions - Optional chat options for the AI agent. Used by default for all chat() calls.
+ * @param agentClientOptions - Optional agent client options including apiKey.
  */
 export function useAiHook(
   integrationId: IntegrationId | undefined,
@@ -188,9 +191,10 @@ export function useAiHook(
   apiIntegration = false,
   allowedApiEndpoints?: string[],
   provideExplanationApiWithAi?: boolean,
-  aiQueryOptions?: ExecuteAiQueryOptions,
+  aiQueryOptions?: AiQueryOptions,
   customApiOptions?: CustomApiOptions,
   aiAgentChatOptions?: AiChatOptions,
+  agentClientOptions?: AiAgentClientOptions,
 ): AiHookResponse {
   const squid = useSquid();
   // If it's an AI query or API integration, we rely on the Squid API key.
@@ -235,7 +239,7 @@ export function useAiHook(
   const statusUpdateObsFun = () => {
     return squid
       .ai()
-      .agent(agentId)
+      .agent(agentId, agentClientOptions)
       .observeStatusUpdates()
       .pipe(
         map((statusUpdate) => {
@@ -388,7 +392,7 @@ export function useAiHook(
           return from(
             squid
               .ai()
-              .agent(agentId)
+              .agent(agentId, agentClientOptions)
               .transcribeAndAskWithVoiceResponse(file, options as AiAskOptionsWithVoice<any>, jobId),
           ).pipe(
             map((response: TranscribeAndAskWithVoiceResponse) => {
@@ -413,7 +417,7 @@ export function useAiHook(
           return from(
             squid
               .ai()
-              .agent(agentId)
+              .agent(agentId, agentClientOptions)
               .transcribeAndChat(file, options as AiChatOptionsWithoutVoice, jobId),
           ).pipe(
             mergeMap((response: TranscribeAndChatResponse) => {
@@ -450,7 +454,7 @@ export function useAiHook(
           return from(
             squid
               .ai()
-              .agent(agentId)
+              .agent(agentId, agentClientOptions)
               .askWithVoiceResponse(prompt, options as AiAskOptionsWithVoice<any>, jobId),
           ).pipe(
             map((response: AskWithVoiceResponse) => {
@@ -473,7 +477,7 @@ export function useAiHook(
           const id = generateUUID();
           return squid
             .ai()
-            .agent(agentId)
+            .agent(agentId, agentClientOptions)
             .chat(prompt, options as AiChatOptionsWithoutVoice, jobId)
             .pipe(
               tap((response) => {
