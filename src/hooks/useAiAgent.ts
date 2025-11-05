@@ -32,18 +32,6 @@ interface BaseChatMessage {
   jobId: JobId | undefined;
 }
 
-/**
- * Generates a unique ID for chat messages and jobs.
- * Uses crypto.randomUUID() if available, otherwise falls back to a simple random string.
- */
-function generateId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  // Fallback for environments without crypto.randomUUID
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-}
-
 export interface AiChatMessage extends BaseChatMessage {
   type: 'ai';
   voiceFile?: File;
