@@ -1,21 +1,19 @@
 'use client';
 
 import {
-  AI_STATUS_MESSAGE_PARENT_MESSAGE_ID_TAG,
-  AI_STATUS_MESSAGE_RESULT_TAG,
+  AiAgentClientOptions,
   AiAgentId,
   AiAskOptionsWithVoice,
   AiChatOptions,
   AiChatOptionsWithoutVoice,
+  AiQueryOptions,
   AiStatusMessage,
   AskWithVoiceResponse,
-  AiQueryOptions,
   generateUUID,
   IntegrationId,
   JobId,
   TranscribeAndAskWithVoiceResponse,
   TranscribeAndChatResponse,
-  AiAgentClientOptions,
 } from '@squidcloud/client';
 import { assertTruthy } from 'assertic';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -74,7 +72,7 @@ export interface CustomApiOptions {
  * @param clientOptions - options for how to connect to the agent from the client
  */
 export function useAiAgent(agentId: AiAgentId, chatOptions?: AiChatOptions, clientOptions?: AiAgentClientOptions): AiHookResponse {
-  return useAiHook('ai_agents', false, agentId, false, undefined, false, undefined, undefined, chatOptions, clientOptions);
+  return useAiHook('ai_agents', false, agentId, false, undefined, undefined, undefined, chatOptions, clientOptions);
 }
 
 // noinspection JSUnusedGlobalSymbols
@@ -85,7 +83,7 @@ export function useAiAgent(agentId: AiAgentId, chatOptions?: AiChatOptions, clie
  * @returns An object containing methods and state for AI chat interactions.
  */
 export function useAiQuery(integrationId: IntegrationId, options?: AiQueryOptions): AiHookResponse {
-  return useAiHook(integrationId, true, undefined, undefined, undefined, undefined, options);
+  return useAiHook(integrationId, true, undefined, undefined, undefined, options);
 }
 
 // noinspection JSUnusedGlobalSymbols
@@ -93,14 +91,12 @@ export function useAiQuery(integrationId: IntegrationId, options?: AiQueryOption
  * Custom hook for making AI queries with a given API integration ID.
  * @param integrationId - The unique identifier for the API integration instance.
  * @param allowedApiEndpoints - Optional list of allowed endpoints the AI can use. If undefined, all endpoints can be used.
- * @param provideExplanationApiWithAi - Set to true to get an explanation of what the AI did. This will increase the response time.
  */
 export function useAiOnApi(
   integrationId: IntegrationId,
   allowedApiEndpoints?: string[],
-  provideExplanationApiWithAi?: boolean,
 ): AiHookResponse {
-  return useAiHook(integrationId, true, undefined, true, allowedApiEndpoints, provideExplanationApiWithAi);
+  return useAiHook(integrationId, true, undefined, true, allowedApiEndpoints);
 }
 
 export interface AiHookResponse {
@@ -178,7 +174,6 @@ export interface AiHookResponse {
  * @param agentId - Required if both aiQuery and apiIntegration are false.
  * @param apiIntegration - True if the integration passed in is an API integration.
  * @param allowedApiEndpoints - For an API integration, optional list of allowed endpoints.
- * @param provideExplanationApiWithAi - For an API integration, set to true for an explanation.
  * @param aiQueryOptions - Options for the AI query (may include `customApiUrl`, `customApiKey`).
  * @param customApiOptions - Optional custom API options for the AI agent, such as `customApiUrl`, `customApiJobId`, and `customApiHeaders`.
  * @param aiAgentChatOptions - Optional chat options for the AI agent. Used by default for all chat() calls.
@@ -190,7 +185,6 @@ export function useAiHook(
   agentId?: string,
   apiIntegration = false,
   allowedApiEndpoints?: string[],
-  provideExplanationApiWithAi?: boolean,
   aiQueryOptions?: AiQueryOptions,
   customApiOptions?: CustomApiOptions,
   aiAgentChatOptions?: AiChatOptions,
@@ -250,18 +244,7 @@ export function useAiHook(
             const prevCopy = { ...prev };
             const prevStatusUpdates = prevCopy[statusUpdate.jobId];
 
-            const aiResponse = statusUpdate.tags?.[AI_STATUS_MESSAGE_RESULT_TAG];
-            if (aiResponse) {
-              const parentMessageId = statusUpdate.tags?.[AI_STATUS_MESSAGE_PARENT_MESSAGE_ID_TAG];
-              const parentStatus = parentMessageId
-                ? prevStatusUpdates.find((s) => s.messageId === parentMessageId)
-                : undefined;
-              if (parentStatus) {
-                parentStatus.tags = { ...(parentStatus.tags || {}), result: aiResponse };
-                return prevCopy;
-              }
-            }
-
+            // Add the status update - nesting is handled by the UI using parentStatusUpdateId
             prevStatusUpdates.push(statusUpdate);
             return prevCopy;
           });
@@ -340,7 +323,9 @@ export function useAiHook(
         if (!prompt) return of('');
         assertTruthy(integrationId, 'Must provide an API integration ID.');
         return from(
-          squid.ai().executeAiApiCall(integrationId, prompt, allowedApiEndpoints, provideExplanationApiWithAi),
+          squid.ai().executeAiApiCall(integrationId, prompt, {
+            operationsToUse: allowedApiEndpoints,
+          }),
         ).pipe(
           map((response) => {
             let result = `### Result\n\n${response.answer}`;
@@ -598,7 +583,6 @@ export function useAskWithApi(options: CustomApiOptions): AiHookResponse {
     options.agentId,
     false, // Not a Squid-based API integration
     undefined, // No allowed endpoints needed
-    undefined, // No explanation needed
     undefined, // No AI query options needed
     options,
   );
