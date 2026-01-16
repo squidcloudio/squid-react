@@ -348,13 +348,17 @@ export function useAiHook(
           map((response) => {
             assertTruthy(response.success, response.answer);
             let result = `### Result\n\n${response.answer}`;
-            if (response.executedQuery) {
-              const prefix = '### Executed Query';
-              result += `\n\n${prefix}\n\n\`\`\`${response.queryMarkdownType || 'sql'}\n${
-                response.executedQuery
-              }\n\`\`\``;
+            if (response.executedQueries && response.executedQueries.length > 0) {
+              const prefix = response.executedQueries.length > 1 ? '### Executed Queries' : '### Executed Query';
+              result += `\n\n${prefix}\n\n`;
+              for (const executedQuery of response.executedQueries) {
+                if (executedQuery.purpose) {
+                  result += `**${executedQuery.purpose}**\n\n`;
+                }
+                result += `\`\`\`${response.queryMarkdownType || 'sql'}\n${executedQuery.query}\n\`\`\`\n\n`;
+              }
               if (response.rawResultsUrl) {
-                result += `\n[View Raw Results](${response.rawResultsUrl})\n\n`;
+                result += `[View Raw Results](${response.rawResultsUrl})\n\n`;
               }
             }
             if (response.explanation) {

@@ -1,6 +1,6 @@
 {
   "name": "@squidcloud/react",
-  "version": "1.0.120",
+  "version": "1.0.121",
   "description": "Squid React SDK",
   "types": "dist/cjs/index.d.ts",
   "main": "dist/cjs/index.js",
@@ -29,7 +29,7 @@
     "rxjs": ">=7.5.7 <8.0.0"
   },
   "dependencies": {
-    "@squidcloud/client": "^1.0.424",
+    "@squidcloud/client": "^1.0.434",
     "assertic": "^1.0.0"
   },
   "devDependencies": {
@@ -57,8 +57,8 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-preserve-directives": "^0.2.0",
     "rollup-plugin-typescript2": "^0.34.1",
-    "yalc": "^1.0.0-pre.53",
     "typedoc": "^0.28.0",
-    "typedoc-plugin-markdown": "^4.5.2"
+    "typedoc-plugin-markdown": "^4.5.2",
+    "yalc": "^1.0.0-pre.53"
   }
 }
