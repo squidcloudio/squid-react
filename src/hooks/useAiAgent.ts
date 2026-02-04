@@ -15,7 +15,7 @@ import {
   TranscribeAndAskWithVoiceResponse,
   TranscribeAndChatResponse,
 } from '@squidcloud/client';
-import { assertTruthy } from 'assertic';
+import { assertTruthy, truthy } from 'assertic';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { from, map, mergeMap, of, tap } from 'rxjs';
 import { useObservable } from './useObservable';
@@ -343,7 +343,12 @@ export function useAiHook(
       if (aiQuery) {
         if (!prompt) return of('');
         assertTruthy(integrationId, 'Must provide a Database integration ID.');
-        return from(squid.ai().executeAiQuery(integrationId, prompt, aiQueryOptions)).pipe(
+        return from(squid.ai().executeAiQuery(integrationId, prompt, {
+          ...(aiQueryOptions || {}), sessionContext: {
+            clientId: squid.connectionDetails().clientId,
+            jobId: truthy(jobId, 'JobId must be defined for AI queries'),
+          },
+        })).pipe(
           map((response) => {
             assertTruthy(response.success, response.answer);
             let result = `### Result\n\n${response.answer}`;
@@ -513,7 +518,7 @@ export function useAiHook(
    * Methods exposed to the user of the hook.
    */
   const chat = (newPrompt: string, chatOptions?: AiChatOptions, jobId?: JobId) => {
-    jobId = jobId || aiQueryOptions?.sessionContext?.jobId || generateUUID();
+    jobId = jobId || generateUUID();
     setJobIdAndInitialStatusUpdate(jobId);
     setPrompt(newPrompt);
     setOptions(mergeOptions(chatOptions));
