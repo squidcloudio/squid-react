@@ -233,7 +233,6 @@ export function useAiHook(
   const statusUpdateObsFun = () => {
     return squid
       .ai()
-      .agent(agentId, agentClientOptions)
       .observeStatusUpdates()
       .pipe(
         map((statusUpdate) => {
@@ -514,7 +513,7 @@ export function useAiHook(
    * Methods exposed to the user of the hook.
    */
   const chat = (newPrompt: string, chatOptions?: AiChatOptions, jobId?: JobId) => {
-    jobId = jobId || generateUUID();
+    jobId = jobId || aiQueryOptions?.sessionContext?.jobId || generateUUID();
     setJobIdAndInitialStatusUpdate(jobId);
     setPrompt(newPrompt);
     setOptions(mergeOptions(chatOptions));

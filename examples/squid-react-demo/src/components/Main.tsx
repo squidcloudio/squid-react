@@ -1,16 +1,29 @@
-import { useAiAgent } from '@squidcloud/react';
+import { useAiQuery, useSquid } from '@squidcloud/react';
 import { useEffect } from 'react';
+import { generateId } from '@squidcloud/client';
+
+
+const jobId = generateId();
 
 export default function Main() {
-  const { chat, statusUpdates } = useAiAgent('saaa', {
-    apiKey: import.meta.env.VITE_SQUID_AGENT_API_KEY,
+  const squid = useSquid();
+
+  const { chat, statusUpdates, history, data } = useAiQuery('ttt', {
+    sessionContext: {
+      jobId,
+      clientId: squid.connectionDetails().clientId,
+    },
   });
+
   useEffect(() => {
-    console.log('Status updates', statusUpdates);
-  }, [statusUpdates]);
+    console.log('Status updates, History:', JSON.stringify(history, null, 2), 'Status:', JSON.stringify(statusUpdates, null, 2));
+  }, [statusUpdates, history]);
   useEffect(() => {
-    chat('What is the weather like today?');
+    chat('How many devices are there?');
   }, []);
+  useEffect(() => {
+    console.log('data:', data);
+  }, [data]);
 
   return (
     <div className={'container'}>

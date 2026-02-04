@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './styles/global.scss';
 import './styles/tw.css';
+import { SquidRegion } from '@squidcloud/client';
 
 const router = createBrowserRouter([
   {
