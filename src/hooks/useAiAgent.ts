@@ -347,7 +347,7 @@ export function useAiHook(
         return from(squid.ai().executeAiQuery(integrationId, prompt, {
           ...(aiQueryOptions || {}), sessionContext: {
             clientId: squid.connectionDetails().clientId,
-            agentId,
+            // agentId,
             jobId: truthy(jobId, 'JobId must be defined for AI queries'),
           },
         })).pipe(
