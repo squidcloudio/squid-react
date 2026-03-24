@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  typecheck-and-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - name: Install latest @squidcloud/client
+        run: npm install @squidcloud/client@latest
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Generate reference docs
+        run: npm run generate-docs-html

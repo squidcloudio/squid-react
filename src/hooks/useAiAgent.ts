@@ -233,7 +233,7 @@ export function useAiHook(
   const statusUpdateObsFun = () => {
     return squid
       .ai()
-      .agent(agentId)
+      // .agent(agentId)
       .observeStatusUpdates()
       .pipe(
         map((statusUpdate) => {
