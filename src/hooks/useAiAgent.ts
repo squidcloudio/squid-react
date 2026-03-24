@@ -233,7 +233,6 @@ export function useAiHook(
   const statusUpdateObsFun = () => {
     return squid
       .ai()
-      .agent(agentId)
       .observeStatusUpdates()
       .pipe(
         map((statusUpdate) => {
@@ -347,7 +346,6 @@ export function useAiHook(
         return from(squid.ai().executeAiQuery(integrationId, prompt, {
           ...(aiQueryOptions || {}), sessionContext: {
             clientId: squid.connectionDetails().clientId,
-            agentId,
             jobId: truthy(jobId, 'JobId must be defined for AI queries'),
           },
         })).pipe(
