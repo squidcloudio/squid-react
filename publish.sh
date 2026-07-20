@@ -17,7 +17,7 @@ usage() {
 }
 
 # Ensure required commands are available
-for cmd in npm jq; do
+for cmd in npm; do
   command -v "$cmd" >/dev/null 2>&1 || { echo "❌ Required command '$cmd' not found." >&2; exit 1; }
 done
 
