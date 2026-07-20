@@ -16,6 +16,11 @@ export type QueryType<T> = {
   data: Array<T>;
   /** Any error that may have occurred during the query execution. */
   error: any;
+  /**
+   * Indicates whether the query is enabled. When `false`, the query does not run and `loading` remains `true` until
+   * the query becomes enabled.
+   */
+  enabled: boolean;
 };
 
 export type QueryOptions<T> = {
@@ -55,7 +60,7 @@ function getDefaultQueryOptions<T>(): Required<QueryOptions<T>> {
  * @param query - The Squid query.
  * @param options - Options to control the behavior of the query.
  * @param deps - An array of dependencies that, when changed, will cause the hook to resubscribe to the query updates.
- * @returns An object containing the current state of the query operation: the loading status, the array of data items, and any error.
+ * @returns An object containing the current state of the query operation: the loading status, the array of data items, any error, and whether the query is enabled.
  */
 export function useQuery<T>(
   query: SnapshotEmitter<T>,
@@ -79,5 +84,5 @@ export function useQuery<T>(
     { enabled, initialData: initialData || peekInitialValue() },
     [JSON.stringify(query.serialize()), subscribe, JSON.stringify(deps)],
   );
-  return { loading, error, data };
+  return { loading, error, data, enabled };
 }
